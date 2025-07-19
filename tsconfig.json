@@ -15,12 +15,18 @@
     "rootDirs": [".", "./.react-router/types"],
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./app/*"]
+      "~/*": ["./app/*"],
+      "#tests/*": ["./tests/*"],
+			"@/icon-name": [
+				"./app/components/ui/icons/types.ts",
+				"./types/icon-name.d.ts"
+			]
     },
     "esModuleInterop": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "strict": true
   }
