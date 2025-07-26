@@ -10,3 +10,192 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  employee_id String @id
+  username    String @unique
+  password    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user Employee @relation(fields: [employee_id], references: [employee_id])
+}
+
+model Employee {
+  employee_id       String  @id
+  employee_name     String?
+  employee_mobile   String
+  employee_email    String  @unique
+  employee_position String
+  position          String
+  company_id        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User?
+  company Company @relation(fields: [company_id], references: [company_id])
+
+  quotations Quotation_Request[]
+}
+
+model Company {
+  company_id      String @id
+  company_name    String
+  company_email   String @unique
+  company_phone   String
+  company_address String
+  company_country String
+  company_type    Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  employees           Employee[]
+  supplier_quotations Supplier_Quotation[]
+  quotation_requests  Quotation_Request[]
+}
+
+model Product {
+  product_id          String  @id
+  product_name        String
+  product_ref_number  Int
+  product_description String?
+  product_attributes  Json?
+  product_category_id String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product_category ProductCategory @relation(fields: [product_category_id], references: [product_category_id])
+
+  quotation_request_line_items Quotation_Request_Line_Item[]
+}
+
+model ProductCategory {
+  product_category_id         String @id
+  product_category_name       String
+  product_category_attributes Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products Product[]
+}
+
+model Quotation_Request {
+  quotation_request_id     String   @id
+  quotation_request_ref    String
+  quotation_request_date   DateTime @default(now())
+  quotation_request_vessel String?
+  company_id               String
+  company     Company @relation(fields: [company_id], references: [company_id])
+  user_id                  String
+
+  employee_id String
+  employee    Employee @relation(fields: [employee_id], references: [employee_id])
+
+  quotation_request_line_items Quotation_Request_Line_Item[]
+  order                        Order?
+}
+
+model Quotation_Request_Line_Item {
+  quotation_request_line_item_id       String @id
+  quotation_request_line_item_quantity Int
+  quotation_request_line_item_values   Json?
+
+  quotation_request_id String
+  quotation_request    Quotation_Request    @relation(fields: [quotation_request_id], references: [quotation_request_id])
+  product_id           String
+  product              Product              @relation(fields: [product_id], references: [product_id])
+  supplier_quotations  Supplier_Quotation[]
+}
+
+model Supplier_Quotation {
+  supplier_quotation_id String @id
+
+  supplier_quotation_supplier_date  DateTime
+  supplier_quotation_supplier_price Float
+  supplier_quotation_lead_time      DateTime
+  supplier_quotation_client_date    DateTime
+  supplier_quotation_client_price   Float
+  supplier_quotation_accepted       Boolean
+  supplier_quotation_status         Int
+
+  company_id String
+  company    Company @relation(fields: [company_id], references: [company_id])
+
+  quotation_request_line_item_id String
+  quotation_request_line_item    Quotation_Request_Line_Item @relation(fields: [quotation_request_line_item_id], references: [quotation_request_line_item_id])
+
+  order_line_items Order_Line_Item?
+}
+
+model Order {
+  order_id                           String   @id
+  order_client_ref                   String
+  order_supplier_ref                 String?
+  order_address                      String
+  order_country                      String
+  order_status                       Int // 0: Pending, 1: Confirmed, 2: Shipped, 3: Delivered, 4: Cancelled
+  order_supplier_purchase_order_date DateTime
+  order_client_purchase_order_date   DateTime
+  order_client_payment_status        Int // 0: Unpaid, 1: Paid, 2: Partially Paid
+  order_supplier_payment_status      Int // 0: Unpaid, 1: Paid, 2: Partially Paid
+  order_vessel                       String?
+  order_date                         DateTime @default(now())
+
+  quotation_request Quotation_Request @relation(fields: [order_id], references: [quotation_request_id])
+  order_line_items  Order_Line_Item[]
+
+  client_invoice     Client_Invoice?
+  commercial_invoice Commercial_Invoice?
+}
+
+model Order_Line_Item {
+  order_line_item_id       String @id
+  order_line_item_quantity Int
+  order_line_item_price    Float
+  order_line_item_values   Json?
+
+  supplier_quotation_id String             @unique
+  supplier_quotation    Supplier_Quotation @relation(fields: [supplier_quotation_id], references: [supplier_quotation_id])
+
+  order_id String
+  order    Order  @relation(fields: [order_id], references: [order_id])
+
+  supplier_invoice_id String?
+  supplier_invoice    Supplier_Invoice? @relation(fields: [supplier_invoice_id], references: [supplier_invoice_id])
+}
+
+model Supplier_Invoice {
+  supplier_invoice_id                String   @id
+  supplir_invoice_number             String
+  supplier_invoice_shipping_costs    Float
+  supplier_invoice_other_costs       Float
+  supplier_invoice_certificate_price Float
+  supplier_invoice_date              DateTime
+
+  order_line_items Order_Line_Item[]
+}
+
+model Client_Invoice {
+  client_invoice_id                String   @id
+  client_invoice_number            String
+  client_invoice_shipping_costs    Float
+  client_invoice_other_costs       Float
+  client_invoice_certificate_price Float
+  client_invoice_date              DateTime
+
+  order Order @relation(fields: [client_invoice_id], references: [order_id])
+}
+
+model Commercial_Invoice {
+  commercial_invoice_id     String   @id
+  commercial_invoice_number String
+  commercial_invoice_costs  Float
+  commercial_invoice_date   DateTime
+
+  order Order @relation(fields: [commercial_invoice_id], references: [order_id])
+}
