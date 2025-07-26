@@ -14,6 +14,7 @@
     "@conform-to/react": "^1.8.2",
     "@conform-to/zod": "^1.8.2",
     "@headlessui/react": "^2.2.4",
+    "@prisma/client": "^6.12.0",
     "@react-router/node": "^7.7.0",
     "@react-router/serve": "^7.7.0",
     "@tanstack/react-table": "^8.21.3",
