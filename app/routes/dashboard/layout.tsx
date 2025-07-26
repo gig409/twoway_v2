@@ -19,6 +19,7 @@ import {
     Square2StackIcon,
     TicketIcon,
 } from '@heroicons/react/20/solid'
+import { Outlet } from 'react-router'
 import { Avatar } from '~/components/ui/avatar'
 import {
     Dropdown,
@@ -131,9 +132,9 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
           </SidebarHeader>
           <SidebarBody>
             <SidebarSection>
-              <SidebarItem href="/">
+              <SidebarItem href="/dashboard/companies">
                 <HomeIcon />
-                <SidebarLabel>Home</SidebarLabel>
+                <SidebarLabel>Companies</SidebarLabel>
               </SidebarItem>
               <SidebarItem href="/events">
                 <Square2StackIcon />
@@ -214,7 +215,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
         </Sidebar>
       }
     >
-      {/* Your page content */}
+      <Outlet />
     </SidebarLayout>
   )
 }
