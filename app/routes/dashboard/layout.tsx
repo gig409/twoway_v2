@@ -132,7 +132,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
           </SidebarHeader>
           <SidebarBody>
             <SidebarSection>
-              <SidebarItem href="/dashboard/companies">
+              <SidebarItem href="/companies">
                 <HomeIcon />
                 <SidebarLabel>Companies</SidebarLabel>
               </SidebarItem>

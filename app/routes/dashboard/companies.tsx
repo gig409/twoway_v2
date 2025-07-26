@@ -166,7 +166,7 @@ export default function Companies() {
       <Button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} >{">"}</Button>
       <Button onClick={() => table.lastPage()} disabled={!table.getCanNextPage()} >{">>"}</Button>
       <Input type='text' placeholder='Search...' value={customFilter} onChange={(e) => setCustomFilter(e.target.value)} />
-      <Button>Add Company</Button>
+      <Link href="/companyForm">Add Company</Link>
     </>
   );
 }
