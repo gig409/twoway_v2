@@ -1,4 +1,5 @@
 import type { Route } from "./+types/companies._index";
+import type { PrismaClient } from "../../../generated/prisma/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { createColumnHelper, useReactTable, getCoreRowModel, flexRender, getFilteredRowModel, type FilterFn, getPaginationRowModel, getSortedRowModel, type SortingState, type SortingFn} from '@tanstack/react-table';
 import { useMemo, useState } from "react";
@@ -14,15 +15,6 @@ type Company = {
   company_address: string;
   company_country: string;
 };
-
-// type Company = {
-//   id: number;
-//   name: string;
-//   email: string;
-//   phone: string;
-//   address: string;
-//   country: string;
-// };
 
 const customFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
   const cellValue = row.getValue(columnId);
@@ -57,16 +49,10 @@ export function meta({}: Route.MetaArgs) {
 
 export async function loader({}: Route.LoaderArgs) {
   try {
-    console.log("Loading companies...");
     const { getDb } = await import('../../lib/db.server');
-    console.log("Creating database connection...");
-    const db = await getDb();
-
-    console.log("Fetching companies from the database...");
+    const db:PrismaClient = await getDb();
 
     const companies = await db.company.findMany();
-
-    console.log("Companies fetched successfully:", companies);
     
     return { companies };
   } catch (error) {
@@ -83,38 +69,6 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
     pageSize: 5,
   });
   const [sorting, setSorting] = useState<SortingState>([]);
-
-  
-
-  // const companies: Company[] = useMemo(() => [
-  //   { name: "Tech Innovations", location: "San Francisco", employees: 500 },
-  //   { name: "Green Solutions", location: "New York", employees: 300 },
-  //   { name: "HealthTech Corp", location: "Austin", employees: 200 },
-  //   { name: "EduTech", location: "Boston", employees: 150 },
-  //   { name: "FinTech Solutions", location: "Chicago", employees: 400 },
-  //   { name: "Retail Innovations", location: "Los Angeles", employees: 600 },
-  //   { name: "Travel Ventures", location: "Miami", employees: 250 },
-  //   { name: "FoodTech", location: "Seattle", employees: 350 },
-  //   { name: "Logistics Leaders", location: "Denver", employees: 450 },
-  //   { name: "Real Estate Experts", location: "Phoenix", employees: 700 },
-  //   { name: "Entertainment Hub", location: "Las Vegas", employees: 800 },
-  //   { name: "Marketing Masters", location: "Atlanta", employees: 550 },
-  //   { name: "Consulting Pros", location: "Washington D.C.", employees: 650 },
-  //   { name: "Cybersecurity Solutions", location: "San Diego", employees: 750 },
-  //   { name: "AI Innovations", location: "Portland", employees: 850 },
-  //   { name: "Blockchain Technologies", location: "Dallas", employees: 950 },
-  //   { name: "E-commerce Giants", location: "Houston", employees: 1050 },
-  //   { name: "Social Media Networks", location: "Philadelphia", employees: 1150 },
-  //   { name: "Cloud Computing Services", location: "Charlotte", employees: 1250 },
-  //   { name: "Mobile App Developers", location: "San Jose", employees: 1350 },
-  //   { name: "Data Analytics Firms", location: "Indianapolis", employees: 1450 },
-  //   { name: "Gaming Studios", location: "Columbus", employees: 1550 },
-  //   { name: "Virtual Reality Companies", location: "Fort Worth", employees: 1650 },
-  //   { name: "Augmented Reality Solutions", location: "Charlotte", employees: 1750 },
-  //   { name: "Robotics Innovators", location: "Detroit", employees: 1850 },
-  //   { name: "Quantum Computing Labs", location: "El Paso", employees: 1950 },
-  //   { name: "Space Exploration Firms", location: "Seattle", employees: 2050 },
-  // ], []);
 
   const columnHelper = createColumnHelper<Company>();
 
