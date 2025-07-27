@@ -1,20 +1,16 @@
-import  type {  PrismaClient } from '../../../generated/prisma/client'
-import  type {  Route } from '../employees/+types/employees._index'
-
+import type { Route } from '../employees/+types/employees._index'
+import prisma from '~/lib/prisma'
 
 export async function loader() {
   try {
-    const { getDb } = await import('../../lib/db.server');
-    const db:PrismaClient = await getDb();
-
-    const employees = await db.employee.findMany()
-
+    const employees = await prisma.employee.findMany()
     return { employees }
   } catch (error) {
     console.error('Database error:', error)
     return { employees: [] }
   }
 }
+
 
 export default function EmployeesIndex({ loaderData }: Route.ComponentProps) {
   //const { employees } = useLoaderData<typeof loader>()

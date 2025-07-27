@@ -4,6 +4,8 @@ import { Input } from '~/components/ui/input'
 import { Select } from '~/components/ui/select'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
+import prisma from '~/lib/prisma'
+import type { Route } from '../employees/+types/employees.new'
 
 
 // Define the Employee type manually to avoid import issues
@@ -21,10 +23,8 @@ interface Employee {
 
 export async function loader() {
   try {
-    const { getDb } = await import('../../lib/db.server');
-    const db = await getDb();
+    const employees = await prisma.employee.findMany()
 
-    const employees = await db.employee.findMany()
 
     return { employees }
   } catch (error) {
@@ -34,11 +34,17 @@ export async function loader() {
 }
 
 
-export default function EmployeeNew() {
-  
+export default function EmployeeNew({ loaderData }: Route.ComponentProps) {
+
   return (
     <div className="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
-      
+      {loaderData && (
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+            {loaderData.employees.length} Employees Found
+          </h2>
+        </div>
+      )}
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-5xl">Add Employee</h2>
         <p className="mt-2 text-lg/8 text-gray-600">Aute magna irure deserunt veniam aliqua magna enim voluptate.</p>
