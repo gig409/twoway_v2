@@ -1,19 +1,6 @@
-import  type {  PrismaClient } from '../../../generated/prisma'
+import  type {  PrismaClient } from '../../../generated/prisma/client'
 import  type {  Route } from '../employees/+types/employees._index'
 
-
-// Define the Employee type manually to avoid import issues
-interface Employee {
-  employee_id: string
-  employee_name: string | null
-  employee_mobile: string
-  employee_email: string
-  employee_position: string
-  position: string
-  company_id: string
-  createdAt: Date
-  updatedAt: Date
-}
 
 export async function loader() {
   try {
