@@ -1,3 +1,4 @@
+
 // Singleton pattern for Prisma client to avoid multiple instances
 declare global {
   var __prismaClient__: any | undefined

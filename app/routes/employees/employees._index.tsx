@@ -1,5 +1,5 @@
-import { useLoaderData } from "react-router"
-//import  { type Employee } from "../../../generated/prisma"
+import  type {  PrismaClient } from '../../../generated/prisma'
+import  type {  Route } from '../employees/+types/employees._index'
 
 
 // Define the Employee type manually to avoid import issues
@@ -18,10 +18,10 @@ interface Employee {
 export async function loader() {
   try {
     const { getDb } = await import('../../lib/db.server');
-    const db = await getDb();
+    const db:PrismaClient = await getDb();
 
     const employees = await db.employee.findMany()
-  
+
     return { employees }
   } catch (error) {
     console.error('Database error:', error)
@@ -29,8 +29,8 @@ export async function loader() {
   }
 }
 
-export default function EmployeesIndex() {
-  const { employees } = useLoaderData<typeof loader>()
+export default function EmployeesIndex({ loaderData }: Route.ComponentProps) {
+  //const { employees } = useLoaderData<typeof loader>()
   return (
     <div>
       <h2>Employees</h2>
@@ -61,7 +61,7 @@ export default function EmployeesIndex() {
         };
       */}
       <ul>
-        {employees.map((employee: Employee) => (
+        {loaderData.employees.map((employee) => (
           <li key={employee.employee_id}>
             {employee.employee_name} - {employee.employee_email}
           </li>

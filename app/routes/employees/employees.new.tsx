@@ -6,9 +6,6 @@ import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
 
 
-
-
-
 // Define the Employee type manually to avoid import issues
 interface Employee {
   employee_id: string
