@@ -90,7 +90,7 @@ model Quotation_Request {
   quotation_request_date   DateTime @default(now())
   quotation_request_vessel String?
   company_id               String
-  company     Company @relation(fields: [company_id], references: [company_id])
+  company                  Company  @relation(fields: [company_id], references: [company_id])
   user_id                  String
 
   employee_id String
