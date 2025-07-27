@@ -16,12 +16,6 @@ export function meta({}: Route.MetaArgs) {
     ];
 }
 
-// const FormSchema = z.object({
-//   street_address: z.preprocess((val) => (val === '' || val === undefined ? undefined : val), z.string().min(2, "Must be min 2 chars").max(100, "Must be max 100 chars")),
-//   country: z.string("Must be a string").min(2, "Must be min 2 chars").max(100, "Must be max 100 chars"),
-//   notes: z.string("Must be a string").max(500, "Must be max 500 chars").optional(),
-// });
-
 const FormSchema = z.object({
     company_name: z.string({error: "Company name is required"}).min(2, "Must be min 2 chars").max(100, "Must be max 100 chars"),
     company_email: z.email("Must be a valid email").max(100, "Must be max 100 chars"),
@@ -34,7 +28,15 @@ const FormSchema = z.object({
 });
 
 export async function loader({params}: Route.LoaderArgs) {
-    return { message: "Hello from the loader!" };
+    try {
+    const { getDb } = await import('../../lib/db.server');
+    const db = await getDb();
+
+    
+  } catch (error) {
+    console.error('Failed to create PrismaClient:', error)
+    throw new Error('Database connection failed')
+  }
 }
 
 export async function action({request}: Route.ActionArgs) {

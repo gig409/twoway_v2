@@ -57,21 +57,24 @@ export function meta({}: Route.MetaArgs) {
 
 export async function loader({}: Route.LoaderArgs) {
   try {
-    const companies = await prisma.company.findMany({
-      select: {
-        company_id: true,
-        company_name: true,
-        company_email: true,
-        company_phone: true,
-        company_address: true,
-        company_country: true,
-      },
+    const { getDb } = await import('../../lib/db.server');
+    const db = await getDb();
+
+    const companies = await db.company.findMany({
+      // select: {
+      //   company_id: true,
+      //   company_name: true,
+      //   company_email: true,
+      //   company_phone: true,
+      //   company_address: true,
+      //   company_country: true,
+      // },
     });
     
     return { companies };
   } catch (error) {
-    console.error("Error fetching companies:", error);
-    return { companies: [] };
+    console.error('Failed to create PrismaClient:', error)
+    throw new Error('Database connection failed')
   }
 }
 
