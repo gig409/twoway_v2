@@ -13,6 +13,14 @@ export default [
               route("new", "./routes/companies/companies.new.tsx"),
               route(":companyId/edit", "./routes/companies/companies.$companyId.edit.tsx"),
             ]),
+      ]),
+      // Employees routes
+      layout("./routes/employees/employees_layout.tsx", [
+            ...prefix("employees", [
+              index("./routes/employees/employees._index.tsx"),
+              route("new", "./routes/employees/employees.new.tsx"),
+              route(":employeeId/edit", "./routes/employees/employees.$employeeId.edit.tsx"),
+            ]),
           ]),
         ]),
     ]),
