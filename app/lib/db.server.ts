@@ -7,10 +7,8 @@ let prismaClient: any
 
 async function createPrismaClient() {
   try {
-    // Use createRequire to handle CommonJS in ES module environment
-    const { createRequire } = await import('module')
-    const require = createRequire(import.meta.url)
-    const { PrismaClient } = require('../../generated/prisma/client.js')
+
+    const { PrismaClient } = await import('../../generated/prisma/client')
     return new PrismaClient()
   } catch (error) {
     console.error('Failed to create PrismaClient:', error)
