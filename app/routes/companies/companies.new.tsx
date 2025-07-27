@@ -28,15 +28,7 @@ const FormSchema = z.object({
 });
 
 export async function loader({params}: Route.LoaderArgs) {
-    try {
-    const { getDb } = await import('../../lib/db.server');
-    const db = await getDb();
-
-    
-  } catch (error) {
-    console.error('Failed to create PrismaClient:', error)
-    throw new Error('Database connection failed')
-  }
+    return { message: "Hello from the loader!" };
 }
 
 export async function action({request}: Route.ActionArgs) {
