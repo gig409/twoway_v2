@@ -1,4 +1,4 @@
-import type { Route } from "./+types/companies";
+import type { Route } from "./+types/companies._index";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { createColumnHelper, useReactTable, getCoreRowModel, flexRender, getFilteredRowModel, type FilterFn, getPaginationRowModel, getSortedRowModel, type SortingState, type SortingFn} from '@tanstack/react-table';
 import { useMemo, useState } from "react";
@@ -7,10 +7,22 @@ import { Button } from "~/components/ui/button";
 import { Link } from "~/components/ui/link";
 
 type Company = {
-  name: string;
-  location: string;
-  employees: number;
+  company_id: string;
+  company_name: string;
+  company_email: string;
+  company_phone: string;
+  company_address: string;
+  company_country: string;
 };
+
+// type Company = {
+//   id: number;
+//   name: string;
+//   email: string;
+//   phone: string;
+//   address: string;
+//   country: string;
+// };
 
 const customFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
   const cellValue = row.getValue(columnId);
@@ -43,7 +55,28 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Companies() {
+export async function loader({}: Route.LoaderArgs) {
+  try {
+    const companies = await prisma.company.findMany({
+      select: {
+        company_id: true,
+        company_name: true,
+        company_email: true,
+        company_phone: true,
+        company_address: true,
+        company_country: true,
+      },
+    });
+    
+    return { companies };
+  } catch (error) {
+    console.error("Error fetching companies:", error);
+    return { companies: [] };
+  }
+}
+
+export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
+  const { companies } = loaderData;
   const [customFilter, setCustomFilter] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -51,49 +84,59 @@ export default function Companies() {
   });
   const [sorting, setSorting] = useState<SortingState>([]);
 
-  const companies: Company[] = useMemo(() => [
-    { name: "Tech Innovations", location: "San Francisco", employees: 500 },
-    { name: "Green Solutions", location: "New York", employees: 300 },
-    { name: "HealthTech Corp", location: "Austin", employees: 200 },
-    { name: "EduTech", location: "Boston", employees: 150 },
-    { name: "FinTech Solutions", location: "Chicago", employees: 400 },
-    { name: "Retail Innovations", location: "Los Angeles", employees: 600 },
-    { name: "Travel Ventures", location: "Miami", employees: 250 },
-    { name: "FoodTech", location: "Seattle", employees: 350 },
-    { name: "Logistics Leaders", location: "Denver", employees: 450 },
-    { name: "Real Estate Experts", location: "Phoenix", employees: 700 },
-    { name: "Entertainment Hub", location: "Las Vegas", employees: 800 },
-    { name: "Marketing Masters", location: "Atlanta", employees: 550 },
-    { name: "Consulting Pros", location: "Washington D.C.", employees: 650 },
-    { name: "Cybersecurity Solutions", location: "San Diego", employees: 750 },
-    { name: "AI Innovations", location: "Portland", employees: 850 },
-    { name: "Blockchain Technologies", location: "Dallas", employees: 950 },
-    { name: "E-commerce Giants", location: "Houston", employees: 1050 },
-    { name: "Social Media Networks", location: "Philadelphia", employees: 1150 },
-    { name: "Cloud Computing Services", location: "Charlotte", employees: 1250 },
-    { name: "Mobile App Developers", location: "San Jose", employees: 1350 },
-    { name: "Data Analytics Firms", location: "Indianapolis", employees: 1450 },
-    { name: "Gaming Studios", location: "Columbus", employees: 1550 },
-    { name: "Virtual Reality Companies", location: "Fort Worth", employees: 1650 },
-    { name: "Augmented Reality Solutions", location: "Charlotte", employees: 1750 },
-    { name: "Robotics Innovators", location: "Detroit", employees: 1850 },
-    { name: "Quantum Computing Labs", location: "El Paso", employees: 1950 },
-    { name: "Space Exploration Firms", location: "Seattle", employees: 2050 },
-  ], []);
+  
+
+  // const companies: Company[] = useMemo(() => [
+  //   { name: "Tech Innovations", location: "San Francisco", employees: 500 },
+  //   { name: "Green Solutions", location: "New York", employees: 300 },
+  //   { name: "HealthTech Corp", location: "Austin", employees: 200 },
+  //   { name: "EduTech", location: "Boston", employees: 150 },
+  //   { name: "FinTech Solutions", location: "Chicago", employees: 400 },
+  //   { name: "Retail Innovations", location: "Los Angeles", employees: 600 },
+  //   { name: "Travel Ventures", location: "Miami", employees: 250 },
+  //   { name: "FoodTech", location: "Seattle", employees: 350 },
+  //   { name: "Logistics Leaders", location: "Denver", employees: 450 },
+  //   { name: "Real Estate Experts", location: "Phoenix", employees: 700 },
+  //   { name: "Entertainment Hub", location: "Las Vegas", employees: 800 },
+  //   { name: "Marketing Masters", location: "Atlanta", employees: 550 },
+  //   { name: "Consulting Pros", location: "Washington D.C.", employees: 650 },
+  //   { name: "Cybersecurity Solutions", location: "San Diego", employees: 750 },
+  //   { name: "AI Innovations", location: "Portland", employees: 850 },
+  //   { name: "Blockchain Technologies", location: "Dallas", employees: 950 },
+  //   { name: "E-commerce Giants", location: "Houston", employees: 1050 },
+  //   { name: "Social Media Networks", location: "Philadelphia", employees: 1150 },
+  //   { name: "Cloud Computing Services", location: "Charlotte", employees: 1250 },
+  //   { name: "Mobile App Developers", location: "San Jose", employees: 1350 },
+  //   { name: "Data Analytics Firms", location: "Indianapolis", employees: 1450 },
+  //   { name: "Gaming Studios", location: "Columbus", employees: 1550 },
+  //   { name: "Virtual Reality Companies", location: "Fort Worth", employees: 1650 },
+  //   { name: "Augmented Reality Solutions", location: "Charlotte", employees: 1750 },
+  //   { name: "Robotics Innovators", location: "Detroit", employees: 1850 },
+  //   { name: "Quantum Computing Labs", location: "El Paso", employees: 1950 },
+  //   { name: "Space Exploration Firms", location: "Seattle", employees: 2050 },
+  // ], []);
 
   const columnHelper = createColumnHelper<Company>();
 
   const columns = useMemo(() => [
-    columnHelper.accessor("name", {
-      header: () => "Name",
-      cell: (info) => info.getValue().toUpperCase(),
+    columnHelper.accessor("company_name", {
+      header: () => "Company Name",
+      cell: (info) => (info.getValue() as string).toUpperCase(),
     }),
-    columnHelper.accessor("location", {
-      header: () => "Location",
+    columnHelper.accessor("company_email", {
+      header: () => "Email",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("employees", {
-      header: () =>"Employees",
+    columnHelper.accessor("company_phone", {
+      header: () => "Phone",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor("company_address", {
+      header: () => "Address",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor("company_country", {
+      header: () => "Country",
       cell: (info) => info.getValue(),
     }),
   ], []);
@@ -166,7 +209,6 @@ export default function Companies() {
       <Button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} >{">"}</Button>
       <Button onClick={() => table.lastPage()} disabled={!table.getCanNextPage()} >{">>"}</Button>
       <Input type='text' placeholder='Search...' value={customFilter} onChange={(e) => setCustomFilter(e.target.value)} />
-      <Link href="/companyForm">Add Company</Link>
     </>
   );
 }
