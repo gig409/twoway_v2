@@ -1,4 +1,5 @@
 import type { Route } from "./+types/companies.new";
+import type { PrismaClient } from "../../../generated/prisma/client";
 import { Form } from "react-router";
 import { Input } from "~/components/ui/input";
 import { Description, ErrorMessage, Field, FieldGroup, Fieldset, Label, Legend } from "~/components/ui/fieldset";
