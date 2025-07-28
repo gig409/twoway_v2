@@ -1,11 +1,11 @@
 import type { Route } from "./+types/companies._index";
-import type { PrismaClient } from "../../../generated/prisma/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { createColumnHelper, useReactTable, getCoreRowModel, flexRender, getFilteredRowModel, type FilterFn, getPaginationRowModel, getSortedRowModel, type SortingState, type SortingFn} from '@tanstack/react-table';
 import { useMemo, useState } from "react";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Link } from "~/components/ui/link";
+import prisma from '~/lib/prisma';
 
 type Company = {
   company_id: string;
@@ -49,10 +49,7 @@ export function meta({}: Route.MetaArgs) {
 
 export async function loader({}: Route.LoaderArgs) {
   try {
-    const { getDb } = await import('../../lib/db.server');
-    const db:PrismaClient = await getDb();
-
-    const companies = await db.company.findMany();
+    const companies = await prisma.company.findMany();
     
     return { companies };
   } catch (error) {
@@ -93,14 +90,19 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
       header: () => "Country",
       cell: (info) => info.getValue(),
     }),
+    columnHelper.accessor("company_id", {
+      header: () => "Actions",
+      cell: (info) => (
+        <Link href={`/dashboard/companies/${info.getValue()}/edit`} className="text-blue-500 hover:underline">
+          Edit
+        </Link>
+      ),
+    })
   ], []);
 
   const table = useReactTable({
     data: companies,
     columns,
-    // filterFns: {
-    //   fuzzy: customFilterFn,
-    // },
     globalFilterFn: customFilterFn,
     sortingFns: {
       custom: customSortingFn,
@@ -119,15 +121,10 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
     getSortedRowModel: getSortedRowModel(),
   });
 
-  // console.log(table.getRowModel().rows);
-
   return (
     <>
       <Table>
         <TableHead>
-          {/* <TableHeader>Name</TableHeader>
-          <TableHeader>Location</TableHeader>
-          <TableHeader>Employees</TableHeader> */}
           {table.getHeaderGroups().map(headerGroup => (
               (headerGroup.headers.map(header => (
                   <TableHeader onClick={header.column.getToggleSortingHandler()}>{flexRender(header.column.columnDef.header, header.getContext())}</TableHeader>
@@ -136,13 +133,6 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
           <TableHeader></TableHeader>
         </TableHead>
         <TableBody>
-          {/* {companies.map((company) => (
-            <TableRow key={company.name}>
-              <TableCell>{company.name}</TableCell>
-              <TableCell>{company.location}</TableCell>
-              <TableCell>{company.employees}</TableCell>
-            </TableRow>
-          ))} */}
           {table.getRowModel().rows.map((row) => (
             <TableRow key={row.id}>
               {row.getVisibleCells().map((cell) => (
@@ -150,10 +140,6 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
               ))}
-              <TableCell><Link href="/CompanyForm">Edit</Link></TableCell>
-              {/* <TableCell>{row.getValue("name")}</TableCell>
-              <TableCell>{row.getValue("location")}</TableCell>
-              <TableCell>{row.getValue("employees")}</TableCell> */}
             </TableRow>
           ))}
         </TableBody>
