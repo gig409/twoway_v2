@@ -6,7 +6,7 @@ import CompanyForm, {FormSchema} from "./companyForm";
 
 export function meta({}: Route.MetaArgs) {
     return [
-        { title: "Company Form" },
+        { title: "Edit Company" },
         { name: "description", content: "Add/Edit company information" },
     ];
 }
