@@ -4,6 +4,8 @@ import { Input } from '~/components/ui/input'
 import { Select } from '~/components/ui/select'
 import { Switch } from '~/components/ui/switch'
 import { Textarea } from '~/components/ui/textarea'
+import prisma from '~/lib/prisma'
+import type { Route } from '../employees/+types/employees.new'
 
 
 // Define the Employee type manually to avoid import issues
@@ -21,10 +23,8 @@ interface Employee {
 
 export async function loader() {
   try {
-    const { getDb } = await import('../../lib/db.server');
-    const db = await getDb();
+    const employees = await prisma.employee.findMany()
 
-    const employees = await db.employee.findMany()
 
     return { employees }
   } catch (error) {
@@ -34,11 +34,17 @@ export async function loader() {
 }
 
 
-export default function EmployeeNew() {
-  
+export default function EmployeeNew({ loaderData }: Route.ComponentProps) {
+
   return (
     <div className="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
-      
+      {loaderData && (
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+            {loaderData.employees.length} Employees Found
+          </h2>
+        </div>
+      )}
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-5xl">Add Employee</h2>
         <p className="mt-2 text-lg/8 text-gray-600">Aute magna irure deserunt veniam aliqua magna enim voluptate.</p>
@@ -55,7 +61,7 @@ export default function EmployeeNew() {
                 name="first-name"
                 type="text"
                 autoComplete="given-name"
-                className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                className="block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 focus:px-3.5"
               />
             </div>
           </div>
@@ -69,7 +75,7 @@ export default function EmployeeNew() {
                 name="last-name"
                 type="text"
                 autoComplete="family-name"
-                className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                className="block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
               />
             </div>
           </div>
@@ -83,7 +89,7 @@ export default function EmployeeNew() {
                 name="company"
                 type="text"
                 autoComplete="organization"
-                className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                className="block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
               />
             </div>
           </div>
@@ -97,7 +103,7 @@ export default function EmployeeNew() {
                 name="email"
                 type="email"
                 autoComplete="email"
-                className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                className="block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
               />
             </div>
           </div>
@@ -113,7 +119,7 @@ export default function EmployeeNew() {
                     name="country"
                     autoComplete="country"
                     aria-label="Country"
-                    className="col-start-1 row-start-1 w-full appearance-none rounded-md py-2 pr-7 pl-3.5 text-base text-gray-500 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                    className="col-start-1 row-start-1 w-full appearance-none rounded-md pr-7 text-base text-gray-500 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   >
                     <option>US</option>
                     <option>CA</option>
@@ -126,7 +132,7 @@ export default function EmployeeNew() {
                   name="phone-number"
                   type="text"
                   placeholder="123-456-7890"
-                  className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                  className="block min-w-0 grow text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                 />
               </div>
             </div>
@@ -140,7 +146,7 @@ export default function EmployeeNew() {
                 id="message"
                 name="message"
                 rows={4}
-                className="block w-full rounded-md bg-white px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
+                className="block w-full rounded-md bg-white text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600"
                 defaultValue={''}
               />
             </div>
