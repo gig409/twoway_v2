@@ -1,5 +1,5 @@
 import type { Route } from "./+types/companies.new";
-import { Form } from "react-router";
+import { Form, useFormAction, useNavigation } from "react-router";
 import { Input } from "~/components/ui/input";
 import { Description, ErrorMessage, Field, FieldGroup, Fieldset, Label, Legend } from "~/components/ui/fieldset";
 import { Select } from "~/components/ui/select";
@@ -14,6 +14,36 @@ export function meta({}: Route.MetaArgs) {
         { title: "Company Form" },
         { name: "description", content: "Add/Edit company information" },
     ];
+}
+
+// Spinner component
+function Spinner({
+	className = 'animate-spin -ml-1 mr-3 h-5 w-5 text-white',
+}: {
+	className?: string
+}) {
+	return (
+		<svg
+			className={className}
+			xmlns="http://www.w3.org/2000/svg"
+			fill="none"
+			viewBox="0 0 24 24"
+		>
+			<circle
+				className="opacity-25"
+				cx="12"
+				cy="12"
+				r="10"
+				stroke="currentColor"
+				strokeWidth="4"
+			></circle>
+			<path
+				className="opacity-75"
+				fill="currentColor"
+				d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+			></path>
+		</svg>
+	)
 }
 
 type Company = {
@@ -35,7 +65,7 @@ interface CompanyFormProps {
 export const FormSchema = z.object({
     company_name: z.string({error: "Company name is required"}).min(2, "Must be min 2 chars").max(100, "Must be max 100 chars"),
     company_email: z.email("Must be a valid email").max(100, "Must be max 100 chars"),
-    company_phone: z.string({error: "Phone number is required"}).min(10, "Must be min 10 digits").max(20, "Must be max 15 digits"),
+    company_phone: z.string({error: "Phone number is required"}).min(10, "Must be min 10 digits").max(20, "Must be max 15 digits").regex(/^[\+]?[0-9\s\-\(\)]+$/, 'Please enter a valid mobile number'),
     company_add1: z.string({error: "Street address is required"}).min(2, "Must be min 2 chars").max(100, "Must be max 100 chars"),
     company_add2: z.string().max(100, "Must be max 100 chars").optional(),
     country: z.string().min(2, "Must be min 2 chars").max(100, "Must be max 100 chars"),
@@ -45,6 +75,12 @@ export const FormSchema = z.object({
 });
 
 export default function CompanyForm({ isEditing, actionData, company }: CompanyFormProps) {
+        const navigation = useNavigation()
+	const formAction = useFormAction()
+	const isPending =
+		navigation.state !== 'idle' &&
+		navigation.formAction === formAction &&
+		navigation.formMethod === 'POST'
 
   const address = company ? company.company_address.split(",") : [];
   if (address.length == 3) {
@@ -141,8 +177,22 @@ export default function CompanyForm({ isEditing, actionData, company }: CompanyF
                     </Field>
                 </FieldGroup>
             </Fieldset>
-            <Button type="submit" className="mt-4">{isEditing ? "Edit" : "Submit"}</Button>
-            <Button type="reset" className="mt-4 ml-2">Reset</Button>
+
+                  <div className="mt-10 flex gap-4">
+            <Button type="submit" disabled={isPending} color="indigo">
+                {isPending ? (
+                    <>
+                        <Spinner />
+                        Creating...
+                    </>
+                ) : (
+                    'Submit'
+                )}
+            </Button>
+
+            <Button type="reset">Reset</Button>
+        </div>
+            
         </Form>
       </div>
     </div>

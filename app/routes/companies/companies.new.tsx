@@ -1,8 +1,10 @@
 import type { Route } from "./+types/companies.new";
-import { redirect } from "react-router";
+import { redirect, useFormAction, useNavigation } from "react-router";
 import { parseWithZod } from '@conform-to/zod/v4'; // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import prisma from '~/lib/prisma';
 import CompanyForm, {FormSchema} from "./companyForm";
+import { GeneralErrorBoundary } from "~/components/error-boundary"
+import { Button } from "~/components/ui/button"
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -10,6 +12,8 @@ export function meta({}: Route.MetaArgs) {
         { name: "description", content: "Add/Edit company information" },
     ];
 }
+
+
 
 export async function loader({params}: Route.LoaderArgs) { 
     return { message: "Hello from the loader!" };
@@ -23,8 +27,7 @@ export async function action({request}: Route.ActionArgs) {
     });
 
     if (submission.status !== 'success') {
-        console.log("errors:", submission);
-        return submission.reply();
+         return submission.reply();
     }
 
     // const { street_address, country, notes } = submission.value;
@@ -44,7 +47,7 @@ export async function action({request}: Route.ActionArgs) {
             }
         });
 
-        return redirect("/dashboard/companies");
+        return redirect("/dashboard/companies?success=Company created successfully!");
     } catch (error) {
         console.error('Failed to create company:', error);
         return submission.reply({
@@ -53,11 +56,16 @@ export async function action({request}: Route.ActionArgs) {
     }
 };
 
-export default function CompanyNew({actionData}: Route.ComponentProps) {
-  return (
-    <div>
-        <CompanyForm isEditing={false} actionData={actionData}></CompanyForm>
-    </div>
+export default function CompanyNew({ actionData }: Route.ComponentProps) {
+
+    return (
+        <div>
+            <CompanyForm isEditing={false} actionData={actionData}></CompanyForm>
+        </div>
   );
+}
+
+export function ErrorBoundary() {
+    return <GeneralErrorBoundary />
 }
 
