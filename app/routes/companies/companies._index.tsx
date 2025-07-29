@@ -1,11 +1,13 @@
 import type { Route } from "./+types/companies._index";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { createColumnHelper, useReactTable, getCoreRowModel, flexRender, getFilteredRowModel, type FilterFn, getPaginationRowModel, getSortedRowModel, type SortingState, type SortingFn} from '@tanstack/react-table';
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 import { Link } from "~/components/ui/link";
+import { Toast } from '~/components/ui/toast'
 import prisma from '~/lib/prisma';
+import { useNavigate } from "react-router"
 
 type Company = {
   company_id: string;
@@ -47,11 +49,14 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader({}: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
+  const url = new URL(request.url)
+  const successMessage = url.searchParams.get('success')
+  
   try {
     const companies = await prisma.company.findMany();
     
-    return { companies };
+    return { companies, successMessage };
   } catch (error) {
     console.error('Failed to create PrismaClient:', error)
     throw new Error('Failed to get companies');
@@ -59,13 +64,26 @@ export async function loader({}: Route.LoaderArgs) {
 }
 
 export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
-  const { companies } = loaderData;
+  const { companies, successMessage } = loaderData;
+  const navigate = useNavigate()
   const [customFilter, setCustomFilter] = useState("");
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
   });
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+
+  // Show toast if there's a success message
+    useEffect(() => {
+      if (successMessage && !toastMessage) {
+        setToastMessage(successMessage)
+        // Clean up URL immediately since we've captured the message
+        const url = new URL(window.location.href)
+        url.searchParams.delete('success')
+        void navigate(url.pathname + url.search, { replace: true })
+      }
+    }, [successMessage, toastMessage, navigate])
 
   const columnHelper = createColumnHelper<Company>();
 
@@ -149,6 +167,14 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
       <Button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} >{">"}</Button>
       <Button onClick={() => table.lastPage()} disabled={!table.getCanNextPage()} >{">>"}</Button>
       <Input type='text' placeholder='Search...' value={customFilter} onChange={(e) => setCustomFilter(e.target.value)} />
+      {/* Success Toast */}
+            {toastMessage && (
+              <Toast
+                message={toastMessage}
+                type="success"
+                onClose={() => setToastMessage(null)}
+              />
+            )}
     </>
   );
 }

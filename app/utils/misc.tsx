@@ -2,6 +2,27 @@ import clsx, { type ClassValue } from "clsx"
 import { useFormAction, useNavigation } from "react-router"
 import { twMerge } from 'tailwind-merge'
 
+export function ErrorMessage({ children }: { children: React.ReactNode }) {
+	return (
+		<div className="mt-1 text-sm font-medium text-red-600" role="alert">
+			{children}
+		</div>
+	)
+}
+
+export function getErrorMessage(error: unknown) {
+	if (typeof error === 'string') return error
+	if (
+		error &&
+		typeof error === 'object' &&
+		'message' in error &&
+		typeof error.message === 'string'
+	) {
+		return error.message
+	}
+	console.error('Unable to get error message for error', error)
+	return 'Unknown Error'
+}
 /**
  * Provide a condition and if that condition is falsey, this throws a 400
  * Response with the given message.
