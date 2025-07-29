@@ -21,8 +21,16 @@ export default [
               route("new", "./routes/employees/employees.new.tsx"),
               route(":employeeId/edit", "./routes/employees/employees.$employeeId.edit.tsx"),
             ]),
-          ]),
-        ]),
+      ]),
+      // Product Categories routes
+      layout("./routes/product_categories/product_categories_layout.tsx", [
+            ...prefix("product_categories", [
+              index("./routes/product_categories/product_categories._index.tsx"),
+              route("new", "./routes/product_categories/product_categories.new.tsx"),
+              // route(":categoryId/edit", "./routes/product_categories/product_categories.$categoryId.edit.tsx"),
+            ])
+      ]),
     ]),
+  ]),
 
 ] satisfies RouteConfig

@@ -1,4 +1,4 @@
-import type { Route } from "./+types/companies.new";
+// import type { Route } from "./+types/companies.new";
 import { Form } from "react-router";
 import { Input } from "~/components/ui/input";
 import { Description, ErrorMessage, Field, FieldGroup, Fieldset, Label, Legend } from "~/components/ui/fieldset";
@@ -9,12 +9,12 @@ import { getInputProps, useForm, getFormProps } from '@conform-to/react';
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'; // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import { z } from 'zod/v4'; // Or, zod/v4 or zod/v4-mini
 
-export function meta({}: Route.MetaArgs) {
-    return [
-        { title: "Company Form" },
-        { name: "description", content: "Add/Edit company information" },
-    ];
-}
+// export function meta({}: Route.MetaArgs) {
+//     return [
+//         { title: "Company Form" },
+//         { name: "description", content: "Add/Edit company information" },
+//     ];
+// }
 
 type Company = {
   company_id: string;
