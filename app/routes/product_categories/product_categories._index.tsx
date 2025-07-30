@@ -83,7 +83,7 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
         }
         return (
           <Text className="whitespace-pre-wrap break-words">
-            {result}
+            {result ? result : "N/A"}
           </Text>
         );
       }

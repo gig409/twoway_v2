@@ -30,7 +30,7 @@ export async function loader({params}: Route.LoaderArgs) {
 }
 
 export async function action({request, params}: Route.ActionArgs) {
-  const { companyId } = params;
+    const { companyId } = params;
     const formData = await request.formData();
 
     const submission = parseWithZod(formData, {
@@ -52,7 +52,7 @@ export async function action({request, params}: Route.ActionArgs) {
             company_id: companyId
           },
           data: {
-              company_id: crypto.randomUUID(),
+              // company_id: crypto.randomUUID(),
               company_name,
               company_email,
               company_phone: company_phone.toString(),

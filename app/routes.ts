@@ -27,7 +27,7 @@ export default [
             ...prefix("product_categories", [
               index("./routes/product_categories/product_categories._index.tsx"),
               route("new", "./routes/product_categories/product_categories.new.tsx"),
-              // route(":categoryId/edit", "./routes/product_categories/product_categories.$categoryId.edit.tsx"),
+              route(":categoryId/edit", "./routes/product_categories/product_categories.$categoryId.edit.tsx"),
             ])
       ]),
     ]),

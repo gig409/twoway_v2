@@ -1,4 +1,4 @@
-import type { Route } from "./+types/product_categories.new";
+import type { Route } from "./+types/product_categories.$categoryId.edit.tsx";
 import { redirect } from "react-router";
 import { parseWithZod } from '@conform-to/zod/v4'; // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import prisma from '~/lib/prisma';
@@ -6,16 +6,31 @@ import ProductCategoryForm, {FormSchema} from "./product_categories_form";
 
 export function meta({}: Route.MetaArgs) {
     return [
-        { title: "Add New Product Category" },
-        { name: "description", content: "Add/Edit product categories" },
+        { title: "Edit Product Category" },
+        { name: "description", content: "Add/Edit product category information" },
     ];
 }
 
 export async function loader({params}: Route.LoaderArgs) { 
-    return { message: "Hello from the loader!" };
+  const { categoryId } = params;
+
+  try {
+    const product_category = await prisma.productCategory.findUnique({
+      where: { product_category_id: categoryId },
+    });
+
+    if (!product_category) {
+      throw new Response("Product category not found", { status: 404 });
+    }
+
+    return { product_category };
+  } catch (error) {
+    throw new Response("Failed to load product category", { status: 500 });
+  }
 }
 
-export async function action({request}: Route.ActionArgs) {
+export async function action({request, params}: Route.ActionArgs) {
+    const { categoryId } = params;
     const formData = await request.formData();
 
     const submission = parseWithZod(formData, {
@@ -27,6 +42,8 @@ export async function action({request}: Route.ActionArgs) {
         return submission.reply();
     }
 
+    // const { street_address, country, notes } = submission.value;
+    // console.log("Form submission values:", { street_address, country, notes });
     const { product_category_name, product_category_attributes } = submission.value;
 
     const JsonAttributes: Record<string, string> = {};
@@ -37,14 +54,17 @@ export async function action({request}: Route.ActionArgs) {
             }
         });
     }
-
+    
     try {
-        await prisma.productCategory.create({
-            data: {
-                product_category_id: crypto.randomUUID(),
-                product_category_name,
-                product_category_attributes: JsonAttributes,
-            }
+        await prisma.productCategory.update({
+          where: { 
+            product_category_id: categoryId
+          },
+          data: {
+              // product_category_id: crypto.randomUUID(),
+              product_category_name,
+              product_category_attributes: JsonAttributes,
+          }
         });
 
         return redirect("/dashboard/product_categories");
@@ -56,10 +76,10 @@ export async function action({request}: Route.ActionArgs) {
     }
 };
 
-export default function ProductCategoryNew({actionData}: Route.ComponentProps) {
+export default function CategoryEdit({loaderData, actionData}: Route.ComponentProps) {
   return (
     <div>
-        <ProductCategoryForm isEditing={false} actionData={actionData}></ProductCategoryForm>
+        <ProductCategoryForm isEditing={true} actionData={actionData} product_category={loaderData.product_category}></ProductCategoryForm>
     </div>
   );
 }
