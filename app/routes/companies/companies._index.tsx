@@ -1,4 +1,21 @@
-import type { Route } from './+types/companies._index'
+import {
+	createColumnHelper,
+	flexRender,
+	getCoreRowModel,
+	getFilteredRowModel,
+	getPaginationRowModel,
+	getSortedRowModel,
+	useReactTable,
+	type FilterFn,
+	type SortingFn,
+	type SortingState,
+} from '@tanstack/react-table'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Link } from '~/components/ui/link'
+import { Select } from '~/components/ui/select'
 import {
 	Table,
 	TableBody,
@@ -7,27 +24,10 @@ import {
 	TableHeader,
 	TableRow,
 } from '~/components/ui/table'
-import {
-	createColumnHelper,
-	useReactTable,
-	getCoreRowModel,
-	flexRender,
-	getFilteredRowModel,
-	type FilterFn,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type SortingState,
-	type SortingFn,
-} from '@tanstack/react-table'
-import { useEffect, useMemo, useState } from 'react'
-import { Input } from '~/components/ui/input'
-import { Button } from '~/components/ui/button'
-import { Link } from '~/components/ui/link'
+import { Text } from '~/components/ui/text'
 import { Toast } from '~/components/ui/toast'
 import prisma from '~/lib/prisma'
-import { useNavigate } from 'react-router'
-import { Select } from '~/components/ui/select'
-import {Text} from '~/components/ui/text'
+import { type Route } from './+types/companies._index'
 
 type Company = {
 	company_id: string
@@ -39,7 +39,6 @@ type Company = {
 }
 
 const customFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
-
 	const cellValue = row.getValue(columnId)
 	if (typeof cellValue === 'string') {
 		return cellValue.toLowerCase().includes(filterValue.toLowerCase())
@@ -87,7 +86,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
 	const { companies, successMessage } = loaderData
 	const navigate = useNavigate()
-  const [customFilter, setCustomFilter] = useState('')
+	const [customFilter, setCustomFilter] = useState('')
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
 		pageSize: 5,
@@ -166,42 +165,43 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
 	})
 
 	return (
-    <>
-      {/* Search and Filters */}
-      <div className="border-b border-gray-200 px-6 py-4">
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <div className="flex-1">
-            <Input
-              type="text"
-              placeholder="Search all columns..."
-              // value={globalFilter ?? ''}
-              // onChange={(e) => setGlobalFilter(e.target.value)}
-              value={customFilter}
-              onChange={(e) => setCustomFilter(e.target.value)}
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <Text className="text-sm text-gray-700">
-              Showing {table.getRowModel().rows.length} of {companies.length}{' '}
-              companies
-            </Text>
-          </div>
-        </div>
-      </div>
+		<>
+			{/* Search and Filters */}
+			<div className="border-b border-gray-200 px-6 py-4">
+				<div className="flex flex-col gap-4 sm:flex-row">
+					<div className="flex-1">
+						<Input
+							type="text"
+							placeholder="Search all columns..."
+							// value={globalFilter ?? ''}
+							// onChange={(e) => setGlobalFilter(e.target.value)}
+							value={customFilter}
+							onChange={(e) => setCustomFilter(e.target.value)}
+						/>
+					</div>
+					<div className="flex items-center space-x-2">
+						<Text className="text-sm text-gray-700">
+							Showing {table.getRowModel().rows.length} of {companies.length}{' '}
+							companies
+						</Text>
+					</div>
+				</div>
+			</div>
 			<Table striped>
 				<TableHead>
-					{table
-						.getHeaderGroups()
-						.map((headerGroup) =>
-							headerGroup.headers.map((header) => (
-								<TableHeader onClick={header.column.getToggleSortingHandler()} key={header.id}>
-									{flexRender(
-										header.column.columnDef.header,
-										header.getContext(),
-									)}
-								</TableHeader>
-							)),
-						)}
+					{table.getHeaderGroups().map((headerGroup) =>
+						headerGroup.headers.map((header) => (
+							<TableHeader
+								onClick={header.column.getToggleSortingHandler()}
+								key={header.id}
+							>
+								{flexRender(
+									header.column.columnDef.header,
+									header.getContext(),
+								)}
+							</TableHeader>
+						)),
+					)}
 					<TableHeader></TableHeader>
 				</TableHead>
 				<TableBody>
@@ -215,55 +215,55 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
 						</TableRow>
 					))}
 				</TableBody>
-      </Table>
-      {/* Pagination */}
-      <div className="border-t border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-shrink-0 items-center space-x-2">
-            <Text className="text-sm whitespace-nowrap text-gray-700">
-              Page {table.getState().pagination.pageIndex + 1} of{' '}
-              {table.getPageCount()}
-            </Text>
-            <Select
-              value={table.getState().pagination.pageSize}
-              onChange={(e) => table.setPageSize(Number(e.target.value))}
-            >
-              {[5, 10, 20, 50].map((pageSize) => (
-                <option key={pageSize} value={pageSize}>
-                  Show {pageSize}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div className="flex space-x-2">
-            <Button
-              onClick={() => table.setPageIndex(0)}
-              disabled={!table.getCanPreviousPage()}
-            >
-              First
-            </Button>
-            <Button
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-            <Button
-              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-              disabled={!table.getCanNextPage()}
-            >
-              Last
-            </Button>
-          </div>
-        </div>
-      </div>
-						
+			</Table>
+			{/* Pagination */}
+			<div className="border-t border-gray-200 px-6 py-4">
+				<div className="flex items-center justify-between">
+					<div className="flex flex-shrink-0 items-center space-x-2">
+						<Text className="text-sm whitespace-nowrap text-gray-700">
+							Page {table.getState().pagination.pageIndex + 1} of{' '}
+							{table.getPageCount()}
+						</Text>
+						<Select
+							value={table.getState().pagination.pageSize}
+							onChange={(e) => table.setPageSize(Number(e.target.value))}
+						>
+							{[5, 10, 20, 50].map((pageSize) => (
+								<option key={pageSize} value={pageSize}>
+									Show {pageSize}
+								</option>
+							))}
+						</Select>
+					</div>
+					<div className="flex space-x-2">
+						<Button
+							onClick={() => table.setPageIndex(0)}
+							disabled={!table.getCanPreviousPage()}
+						>
+							First
+						</Button>
+						<Button
+							onClick={() => table.previousPage()}
+							disabled={!table.getCanPreviousPage()}
+						>
+							Previous
+						</Button>
+						<Button
+							onClick={() => table.nextPage()}
+							disabled={!table.getCanNextPage()}
+						>
+							Next
+						</Button>
+						<Button
+							onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+							disabled={!table.getCanNextPage()}
+						>
+							Last
+						</Button>
+					</div>
+				</div>
+			</div>
+
 			{/* Success Toast */}
 			{toastMessage && (
 				<Toast

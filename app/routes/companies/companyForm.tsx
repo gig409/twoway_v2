@@ -1,7 +1,7 @@
 import {
+	getFormProps,
 	getInputProps,
 	useForm,
-	getFormProps,
 	type SubmissionResult,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
@@ -19,8 +19,6 @@ import {
 } from '~/components/ui/fieldset'
 import { Input } from '~/components/ui/input'
 import { Select } from '~/components/ui/select'
-
-
 
 type Company = {
 	company_id: string
@@ -71,7 +69,6 @@ export const FormSchema = z.object({
 	company_type: z.string(),
 })
 
-
 export default function CompanyForm({
 	isEditing: _isEditing,
 	actionData,
@@ -80,9 +77,9 @@ export default function CompanyForm({
 	const navigation = useNavigation()
 	const formAction = useFormAction()
 	const isPending =
-    navigation.state !== 'idle' &&
-    navigation.formAction === formAction &&
-    navigation.formMethod === 'POST'
+		navigation.state !== 'idle' &&
+		navigation.formAction === formAction &&
+		navigation.formMethod === 'POST'
 
 	const address = company ? company.company_address.split(',') : []
 	if (address.length == 3) {
@@ -98,17 +95,17 @@ export default function CompanyForm({
 		},
 		defaultValue: company
 			? {
-                company_name: company.company_name,
-                company_email: company.company_email,
-                company_phone: company.company_phone,
-                company_add1: address[0],
-                company_add2: address.length > 3 ? address[1].trim() : '',
-                country: company.company_country,
-                company_city:
-                    address.length > 3 ? address[2].trim() : address[1].trim(),
-                company_post_code:
-                    address.length > 3 ? address[3].trim() : address[2].trim(),
-                company_type: company.company_type.toString(),
+					company_name: company.company_name,
+					company_email: company.company_email,
+					company_phone: company.company_phone,
+					company_add1: address[0],
+					company_add2: address.length > 3 ? address[1].trim() : '',
+					country: company.company_country,
+					company_city:
+						address.length > 3 ? address[2].trim() : address[1].trim(),
+					company_post_code:
+						address.length > 3 ? address[3].trim() : address[2].trim(),
+					company_type: company.company_type.toString(),
 				}
 			: undefined,
 	})
