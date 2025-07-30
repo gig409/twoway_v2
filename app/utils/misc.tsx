@@ -1,5 +1,5 @@
-import clsx, { type ClassValue } from "clsx"
-import { useFormAction, useNavigation } from "react-router"
+import clsx, { type ClassValue } from 'clsx'
+import { useFormAction, useNavigation } from 'react-router'
 import { twMerge } from 'tailwind-merge'
 
 export function ErrorMessage({ children }: { children: React.ReactNode }) {
@@ -48,7 +48,7 @@ export function invariantResponse(
 			typeof message === 'function'
 				? message()
 				: message ||
-				  'An invariant failed, please provide a message to explain why.',
+					'An invariant failed, please provide a message to explain why.',
 			{ status: 400, ...responseInit },
 		)
 	}
