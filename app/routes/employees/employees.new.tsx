@@ -1,14 +1,12 @@
 import { parseWithZod } from '@conform-to/zod/v4'
 import { redirect } from 'react-router'
-import type { Route } from '../employees/+types/employees.new'
+import { type Route } from '../employees/+types/employees.new'
 
-
-import EmployeeForm, {schema} from './employeeForm'
+import EmployeeForm, { schema } from './employeeForm'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { Heading } from '~/components/ui/heading'
 import { Text } from '~/components/ui/text'
 import prisma from '~/lib/prisma'
-
 
 export function meta({}: Route.MetaArgs) {
 	return [
@@ -16,7 +14,6 @@ export function meta({}: Route.MetaArgs) {
 		{ name: 'description', content: 'Add a new employee' },
 	]
 }
-
 
 export async function loader() {
 	try {
@@ -78,15 +75,18 @@ export default function EmployeeNew({
 	loaderData,
 	actionData,
 }: Route.ComponentProps) {
-	
 	return (
-		 <div className="isolate bg-white px-6 py-24 sm:py-16 lg:px-8">
-                <div className="mx-auto max-w-2xl text-center">
-                    <Heading>Create a New Company</Heading>
-                    <Text>Add your company details below:</Text>
-                    <EmployeeForm isEditing={false} actionData={actionData} loaderData={loaderData}></EmployeeForm>
-                </div>
-            </div>
+		<div className="isolate bg-white px-6 py-24 sm:py-16 lg:px-8">
+			<div className="mx-auto max-w-2xl text-center">
+				<Heading>Create a New Company</Heading>
+				<Text>Add your company details below:</Text>
+				<EmployeeForm
+					isEditing={false}
+					actionData={actionData}
+					loaderData={loaderData}
+				></EmployeeForm>
+			</div>
+		</div>
 	)
 }
 
