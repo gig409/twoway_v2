@@ -1,4 +1,3 @@
-import type { Route } from './+types/employees.new'
 
 import {
 	getInputProps,

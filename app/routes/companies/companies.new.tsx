@@ -4,7 +4,7 @@ import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { Heading } from '~/components/ui/heading'
 import { Text } from '~/components/ui/text'
 import prisma from '~/lib/prisma'
-import { type Route } from '../companies/+types/companies.new'
+import type { Route } from '../companies/+types/companies.new'
 import CompanyForm, { FormSchema } from './companyForm'
 
 export function meta({}: Route.MetaArgs) {

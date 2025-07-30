@@ -1,6 +1,6 @@
 import { parseWithZod } from '@conform-to/zod/v4'
 import { redirect } from 'react-router'
-import { type Route } from '../employees/+types/employees.new'
+import type { Route } from '../employees/+types/employees.new'
 
 import EmployeeForm, { schema } from './employeeForm'
 import { GeneralErrorBoundary } from '~/components/error-boundary'

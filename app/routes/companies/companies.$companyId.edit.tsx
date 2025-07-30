@@ -1,7 +1,7 @@
 import { parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import { redirect } from 'react-router'
 import prisma from '~/lib/prisma'
-import { type Route } from './+types/companies.$companyId.edit'
+import type { Route } from './+types/companies.$companyId.edit'
 import CompanyForm, { FormSchema } from './companyForm'
 
 export function meta({}: Route.MetaArgs) {
@@ -75,7 +75,9 @@ export async function action({ request, params }: Route.ActionArgs) {
 			},
 		})
 
-		return redirect('/dashboard/companies')
+		return redirect(
+			'/dashboard/companies?success=Company updated successfully!',
+		)
 	} catch (error) {
 		console.error('Failed to create company:', error)
 		return submission.reply({
