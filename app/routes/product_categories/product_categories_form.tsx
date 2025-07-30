@@ -1,20 +1,13 @@
-// import type { Route } from "./+types/companies.new";
 import { Form, useFormAction, useNavigation } from "react-router";
 import { Input } from "~/components/ui/input";
 import { Description, ErrorMessage, Field, FieldGroup, Fieldset, Label, Legend } from "~/components/ui/fieldset";
 import { Text } from "~/components/ui/text";
 import { Button } from "~/components/ui/button";
-import { getInputProps, useForm, getFormProps } from '@conform-to/react';
+import { getInputProps, useForm, getFormProps, type SubmissionResult } from '@conform-to/react';
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4'; // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import { z } from 'zod/v4'; // Or, zod/v4 or zod/v4-mini
 import { GeneralErrorBoundary } from "~/components/error-boundary";
-
-// export function meta({}: Route.MetaArgs) {
-//     return [
-//         { title: "Company Form" },
-//         { name: "description", content: "Add/Edit company information" },
-//     ];
-// }
+import type { JsonValue } from "@prisma/client/runtime/library";
 
 // Spinner component
 function Spinner({
@@ -49,12 +42,12 @@ function Spinner({
 type ProductCategory = {
     product_category_id: string;
     product_category_name: string;
-    product_category_attributes: Record<string, string>;
+    product_category_attributes: JsonValue;
 };
 
 interface ProductCategoryFormProps {
   isEditing: boolean;
-  actionData?: any;
+  actionData?: SubmissionResult<string[]>;
   product_category?: ProductCategory;
 }
 
@@ -104,8 +97,6 @@ export default function ProductCategoryForm({ isEditing, actionData, product_cat
         <div className="px-4 py-5 sm:p-6">
             <Form method="POST" {...getFormProps(form)}>
             <Fieldset>
-                <Legend>Product Category details</Legend>
-                <Text>Enter relevant details of product category.</Text>
                 <FieldGroup>
                     <Field className="text-left">
                         <Label htmlFor={fields.product_category_name.id}>Product Category Name</Label>

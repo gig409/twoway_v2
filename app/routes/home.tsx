@@ -1,14 +1,13 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
 import { Form } from "react-router"
+import type { Route } from "./+types/home";
+import { AuthLayout } from "~/components/ui/auth-layout"
+import { Button } from "~/components/ui/button"
+import { Checkbox, CheckboxField } from "~/components/ui/checkbox"
+import { Field, Label } from "~/components/ui/fieldset"
+import { Heading } from "~/components/ui/heading"
 import { Input } from "~/components/ui/input"
 import { Link } from "~/components/ui/link"
-import { AuthLayout } from "~/components/ui/auth-layout"
-import { Heading } from "~/components/ui/heading"
-import { Field, Label } from "~/components/ui/fieldset"
-import { Checkbox, CheckboxField } from "~/components/ui/checkbox"
 import { Strong, Text, TextLink } from "~/components/ui/text"
-import { Button } from "~/components/ui/button"
 
 export function meta({}: Route.MetaArgs) {
   return [

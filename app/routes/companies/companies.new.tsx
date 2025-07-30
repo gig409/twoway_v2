@@ -1,10 +1,12 @@
-import type { Route } from "./+types/companies.new";
-import { redirect, useFormAction, useNavigation } from "react-router";
+import type { Route } from "../companies/+types/companies.new";
+
 import { parseWithZod } from '@conform-to/zod/v4'; // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
-import prisma from '~/lib/prisma';
+import { redirect } from "react-router";
 import CompanyForm, {FormSchema} from "./companyForm";
 import { GeneralErrorBoundary } from "~/components/error-boundary"
-import { Button } from "~/components/ui/button"
+import { Heading } from "~/components/ui/heading"
+import { Text } from "~/components/ui/text";
+import prisma from '~/lib/prisma';
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -12,8 +14,6 @@ export function meta({}: Route.MetaArgs) {
         { name: "description", content: "Add/Edit company information" },
     ];
 }
-
-
 
 export async function loader({params}: Route.LoaderArgs) { 
     return { message: "Hello from the loader!" };
@@ -59,10 +59,14 @@ export async function action({request}: Route.ActionArgs) {
 export default function CompanyNew({ actionData }: Route.ComponentProps) {
 
     return (
-        <div>
-            <CompanyForm isEditing={false} actionData={actionData}></CompanyForm>
+        <div className="isolate bg-white px-6 py-24 sm:py-16 lg:px-8">
+            <div className="mx-auto max-w-2xl text-center">
+                <Heading>Create a New Company</Heading>
+                <Text>Add your company details below:</Text>
+                <CompanyForm isEditing={false} actionData={actionData}></CompanyForm>
+            </div>
         </div>
-  );
+    );
 }
 
 export function ErrorBoundary() {

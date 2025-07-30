@@ -3,6 +3,8 @@ import { redirect } from "react-router";
 import { parseWithZod } from '@conform-to/zod/v4'; // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import prisma from '~/lib/prisma';
 import ProductCategoryForm, {FormSchema} from "./product_categories_form";
+import { Heading } from "~/components/ui/heading";
+import { Text } from "~/components/ui/text";
 
 export function meta({}: Route.MetaArgs) {
     return [
@@ -58,8 +60,12 @@ export async function action({request}: Route.ActionArgs) {
 
 export default function ProductCategoryNew({actionData}: Route.ComponentProps) {
   return (
-    <div>
-        <ProductCategoryForm isEditing={false} actionData={actionData}></ProductCategoryForm>
+    <div className="isolate bg-white px-6 py-24 sm:py-16 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+                <Heading>Product Category details</Heading>
+                <Text>Enter relevant details of product category.</Text>
+                <ProductCategoryForm isEditing={false} actionData={actionData}></ProductCategoryForm>
+        </div>
     </div>
   );
 }
