@@ -1,4 +1,3 @@
-
 import {
 	getInputProps,
 	useForm,
@@ -18,11 +17,9 @@ import {
 	Fieldset,
 	Label,
 } from '~/components/ui/fieldset'
-import { Heading } from '~/components/ui/heading'
 import { Input } from '~/components/ui/input'
 import { Select } from '~/components/ui/select'
-import { Text } from '~/components/ui/text'
-import prisma from '~/lib/prisma'
+
 
 export const schema = z.object({
 	employee_firstname: z
@@ -52,8 +49,7 @@ export const schema = z.object({
 
 type Employee = {
 	employee_id: string
-	employee_firstname: string
-	employee_lastname: string
+	employee_name: string | null,
 	employee_mobile: string
 	employee_email: string
 	employee_position: string
@@ -90,7 +86,15 @@ export default function EmployeeForm({
 		},
 		shouldRevalidate: 'onBlur',
 
-		defaultValue: {
+		defaultValue: employee ? {
+			employee_firstname: employee.employee_name?.split(' ')[0],
+			employee_lastname: employee.employee_name?.split(' ')[1],
+			employee_mobile: employee.employee_mobile,
+			employee_email: employee.employee_email,
+			employee_position: employee.employee_position,
+			position: employee.position,
+			company_id: employee.company_id,
+		} : {
 			employee_firstname: '',
 			employee_lastname: '',
 			employee_mobile: '',

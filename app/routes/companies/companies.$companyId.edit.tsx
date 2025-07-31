@@ -1,8 +1,10 @@
 import { parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import { redirect } from 'react-router'
-import prisma from '~/lib/prisma'
-import type { Route } from './+types/companies.$companyId.edit'
+import { GeneralErrorBoundary } from '../../components/error-boundary'
+// eslint-disable-next-line import/consistent-type-specifier-style
+import type { Route } from '../companies/+types/companies.$companyId.edit'
 import CompanyForm, { FormSchema } from './companyForm'
+import prisma from '~/lib/prisma'
 
 export function meta({}: Route.MetaArgs) {
 	return [
@@ -99,4 +101,8 @@ export default function CompanyEdit({
 			></CompanyForm>
 		</div>
 	)
+}
+
+export function ErrorBoundary() {
+	return <GeneralErrorBoundary />
 }

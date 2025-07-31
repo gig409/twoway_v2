@@ -1,11 +1,12 @@
 import { parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import { redirect } from 'react-router'
+// eslint-disable-next-line import/consistent-type-specifier-style
+import type { Route } from '../companies/+types/companies.new'
+import CompanyForm, { FormSchema } from './companyForm'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { Heading } from '~/components/ui/heading'
 import { Text } from '~/components/ui/text'
 import prisma from '~/lib/prisma'
-import type { Route } from '../companies/+types/companies.new'
-import CompanyForm, { FormSchema } from './companyForm'
 
 export function meta({}: Route.MetaArgs) {
 	return [
