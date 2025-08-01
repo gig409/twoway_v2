@@ -1,4 +1,3 @@
-import type { Route } from '../employees/+types/employees._index'
 import {
 	flexRender,
 	getCoreRowModel,
@@ -12,6 +11,8 @@ import {
 } from '@tanstack/react-table'
 import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router'
+// eslint-disable-next-line import/consistent-type-specifier-style
+import type { Route } from '../employees/+types/employees._index'
 import { Button } from '~/components/ui/button'
 import { Heading } from '~/components/ui/heading'
 import { Input } from '~/components/ui/input'
@@ -160,8 +161,8 @@ export default function EmployeesIndex({ loaderData }: Route.ComponentProps) {
 				header: 'Actions',
 				cell: ({ row }) => (
 					<div className="flex space-x-2">
-						<Button
-							onClick={() => console.log('Edit:', row.original.employee_id)}
+            <Button
+              href={`/dashboard/employees/${row.original.employee_id}/edit`}							
 							outline
 						>
 							Edit
