@@ -49,13 +49,13 @@ export default [
 				]),
 			]),
 			// Products routes
-			layout('./routes/product/product_layout.tsx', [
+			layout('./routes/products/products_layout.tsx', [
 				...prefix('products', [
-					index('./routes/product/product._index.tsx'),
-					// route('new', './routes/product/product.new.tsx'),
+					index('./routes/products/products._index.tsx'),
+					// route('new', './routes/products/products.new.tsx'),
 					// route(
 					// 	':productId/edit',
-					// 	'./routes/product/product.$productId.edit.tsx',
+					// 	'./routes/products/products.$productId.edit.tsx',
 					// ),
 				]),
 			]),

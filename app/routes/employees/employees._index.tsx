@@ -161,8 +161,8 @@ export default function EmployeesIndex({ loaderData }: Route.ComponentProps) {
 				header: 'Actions',
 				cell: ({ row }) => (
 					<div className="flex space-x-2">
-            <Button
-              href={`/dashboard/employees/${row.original.employee_id}/edit`}							
+						<Button
+							href={`/dashboard/employees/${row.original.employee_id}/edit`}
 							outline
 						>
 							Edit

@@ -2,9 +2,9 @@ import { parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zo
 import { redirect } from 'react-router'
 import { GeneralErrorBoundary } from '../../components/error-boundary'
 // eslint-disable-next-line import/consistent-type-specifier-style
-import prisma from '~/lib/prisma'
 import type { Route } from '../companies/+types/companies.$companyId.edit'
 import CompanyForm, { FormSchema } from './companyForm'
+import prisma from '~/lib/prisma'
 
 export function meta({}: Route.MetaArgs) {
 	return [

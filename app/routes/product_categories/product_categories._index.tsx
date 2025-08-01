@@ -13,6 +13,8 @@ import {
 } from '@tanstack/react-table'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
+// eslint-disable-next-line import/consistent-type-specifier-style
+import type { Route } from '../product_categories/+types/product_categories._index'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Link } from '~/components/ui/link'
@@ -28,7 +30,6 @@ import {
 import { Strong, Text } from '~/components/ui/text'
 import { Toast } from '~/components/ui/toast'
 import prisma from '~/lib/prisma'
-import { type Route } from './+types/product_categories._index'
 
 type ProductCategory = {
 	product_category_id: string

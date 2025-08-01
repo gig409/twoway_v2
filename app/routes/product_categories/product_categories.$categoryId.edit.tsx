@@ -1,8 +1,9 @@
-import type { Route } from './+types/product_categories.$categoryId.edit.tsx'
-import { redirect } from 'react-router'
 import { parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
-import prisma from '~/lib/prisma'
+import { redirect } from 'react-router'
+// eslint-disable-next-line import/consistent-type-specifier-style
+import type { Route } from '../product_categories/+types/product_categories.$categoryId.edit'
 import ProductCategoryForm, { FormSchema } from './product_categories_form'
+import prisma from '~/lib/prisma'
 
 export function meta({}: Route.MetaArgs) {
 	return [

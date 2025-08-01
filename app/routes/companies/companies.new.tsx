@@ -15,7 +15,7 @@ export function meta({}: Route.MetaArgs) {
 	]
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
+export async function loader({}: Route.LoaderArgs) {
 	return { message: 'Hello from the loader!' }
 }
 
