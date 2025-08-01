@@ -1,4 +1,5 @@
-import { type JsonValue } from '@prisma/client/runtime/library'
+// eslint-disable-next-line import/consistent-type-specifier-style
+import type { JsonValue } from '@prisma/client/runtime/library'
 import {
 	createColumnHelper,
 	flexRender,
