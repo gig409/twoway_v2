@@ -48,6 +48,17 @@ export default [
 					),
 				]),
 			]),
+			// Products routes
+			layout('./routes/product/product_layout.tsx', [
+				...prefix('products', [
+					index('./routes/product/product._index.tsx'),
+					// route('new', './routes/product/product.new.tsx'),
+					// route(
+					// 	':productId/edit',
+					// 	'./routes/product/product.$productId.edit.tsx',
+					// ),
+				]),
+			]),
 		]),
 	]),
 ] satisfies RouteConfig

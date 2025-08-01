@@ -28,12 +28,17 @@ import {
 import { Strong, Text } from '~/components/ui/text'
 import { Toast } from '~/components/ui/toast'
 import prisma from '~/lib/prisma'
-import { type Route } from './+types/product_categories._index'
+import { type Route } from './+types/product._index'
 
-type ProductCategory = {
-	product_category_id: string
-	product_category_name: string
-	product_category_attributes: JsonValue
+type Product = {
+	product_id: string
+	product_name: string
+	product_ref_number: number
+	product_description: string | null
+	product_attributes: JsonValue
+	product_category: {
+		product_category_name: string
+	}
 }
 
 const customFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
@@ -71,19 +76,34 @@ export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url)
 	const successMessage = url.searchParams.get('success')
 	try {
-		const product_categories = await prisma.productCategory.findMany()
+		const products = await prisma.product.findMany({
+			select: {
+				product_id: true,
+				product_name: true,
+				product_ref_number: true,
+				product_description: true,
+				product_attributes: true,
+				product_category_id: true,
+				product_category: {
+					select: {
+						product_category_name: true,
+					},
+				},
+			},
+			orderBy: {
+				createdAt: 'desc',
+			},
+		})
 
-		return { product_categories, successMessage }
+		return { products, successMessage }
 	} catch (error) {
 		console.error('Failed to create PrismaClient:', error)
-		throw new Error('Failed to get product categories')
+		throw new Error('Failed to get products')
 	}
 }
 
-export default function ProductCategoriesIndex({
-	loaderData,
-}: Route.ComponentProps) {
-	const { product_categories, successMessage } = loaderData
+export default function ProductsIndex({ loaderData }: Route.ComponentProps) {
+	const { products, successMessage } = loaderData
 	const [customFilter, setCustomFilter] = useState('')
 	const navigate = useNavigate()
 	const [pagination, setPagination] = useState({
@@ -106,13 +126,17 @@ export default function ProductCategoriesIndex({
 	}, [successMessage, toastMessage, navigate])
 
 	const columns = useMemo(() => {
-		const columnHelper = createColumnHelper<ProductCategory>()
+		const columnHelper = createColumnHelper<Product>()
 		return [
-			columnHelper.accessor('product_category_name', {
-				header: () => <Strong>Product Category Name</Strong>,
+			columnHelper.accessor('product_name', {
+				header: () => <Strong>Product Name</Strong>,
 				cell: (info) => <Text>{info.getValue()}</Text>,
 			}),
-			columnHelper.accessor('product_category_attributes', {
+			columnHelper.accessor('product_description', {
+				header: () => <Strong>Product Description</Strong>,
+				cell: (info) => <Text>{info.getValue()}</Text>,
+			}),
+			columnHelper.accessor('product_attributes', {
 				header: () => <Strong>Attributes</Strong>,
 				cell: (info) => {
 					let result: String = ''
@@ -127,11 +151,15 @@ export default function ProductCategoriesIndex({
 					)
 				},
 			}),
-			columnHelper.accessor('product_category_id', {
+			columnHelper.accessor('product_category.product_category_name', {
+				header: () => <Strong>Product Category</Strong>,
+				cell: (info) => <Text>{info.getValue()}</Text>,
+			}),
+			columnHelper.accessor('product_id', {
 				header: () => <Strong>Actions</Strong>,
 				cell: (info) => (
 					<Link
-						href={`/dashboard/product_categories/${info.getValue()}/edit`}
+						href={`/dashboard/products/${info.getValue()}/edit`}
 						className="text-blue-500 hover:underline"
 					>
 						Edit
@@ -142,7 +170,7 @@ export default function ProductCategoriesIndex({
 	}, [])
 
 	const table = useReactTable({
-		data: product_categories,
+		data: products,
 		columns,
 		globalFilterFn: customFilterFn,
 		sortingFns: {
@@ -179,26 +207,27 @@ export default function ProductCategoriesIndex({
 					</div>
 					<div className="flex items-center space-x-2">
 						<Text className="text-sm text-gray-700">
-							Showing {table.getRowModel().rows.length} of{' '}
-							{product_categories.length} product categories
+							Showing {table.getRowModel().rows.length} of {products.length}{' '}
+							products
 						</Text>
 					</div>
 				</div>
 			</div>
 			<Table striped>
 				<TableHead>
-					{table
-						.getHeaderGroups()
-						.map((headerGroup) =>
-							headerGroup.headers.map((header) => (
-								<TableHeader onClick={header.column.getToggleSortingHandler()}>
-									{flexRender(
-										header.column.columnDef.header,
-										header.getContext(),
-									)}
-								</TableHeader>
-							)),
-						)}
+					{table.getHeaderGroups().map((headerGroup) =>
+						headerGroup.headers.map((header) => (
+							<TableHeader
+								key={headerGroup.id}
+								onClick={header.column.getToggleSortingHandler()}
+							>
+								{flexRender(
+									header.column.columnDef.header,
+									header.getContext(),
+								)}
+							</TableHeader>
+						)),
+					)}
 					<TableHeader></TableHeader>
 				</TableHead>
 				<TableBody>

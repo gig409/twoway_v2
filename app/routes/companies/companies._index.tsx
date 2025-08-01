@@ -27,7 +27,7 @@ import {
 import { Text } from '~/components/ui/text'
 import { Toast } from '~/components/ui/toast'
 import prisma from '~/lib/prisma'
-import { type Route } from './+types/companies._index'
+import { type Route } from '../companies/+types/companies._index'
 
 type Company = {
 	company_id: string
