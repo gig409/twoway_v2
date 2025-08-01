@@ -59,6 +59,19 @@ export default [
 					// ),
 				]),
 			]),
+			// Quotations routes
+			layout('./routes/quotations/quotations_layout.tsx', [
+				...prefix('quotations', [
+					index('./routes/quotations/quotations._index.tsx'),
+					route('new', './routes/quotations/quotations.new.tsx'),
+					route(
+						':quotationId/edit',
+						'./routes/quotations/quotations.$quotationId.edit.tsx',
+					),
+				]),
+			]),
 		]),
 	]),
 ] satisfies RouteConfig
+
+

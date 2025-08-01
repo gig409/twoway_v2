@@ -99,18 +99,23 @@ model Quotation_Request {
 
   quotation_request_line_items Quotation_Request_Line_Item[]
   order                        Order?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Quotation_Request_Line_Item {
   quotation_request_line_item_id       String @id
   quotation_request_line_item_quantity Int
-  quotation_request_line_item_values   Json?
 
   quotation_request_id String
   quotation_request    Quotation_Request    @relation(fields: [quotation_request_id], references: [quotation_request_id])
   product_id           String
   product              Product              @relation(fields: [product_id], references: [product_id])
   supplier_quotations  Supplier_Quotation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Supplier_Quotation {
@@ -131,6 +136,9 @@ model Supplier_Quotation {
   quotation_request_line_item    Quotation_Request_Line_Item @relation(fields: [quotation_request_line_item_id], references: [quotation_request_line_item_id])
 
   order_line_items Order_Line_Item?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Order {
@@ -152,6 +160,9 @@ model Order {
 
   client_invoice     Client_Invoice?
   commercial_invoice Commercial_Invoice?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Order_Line_Item {
@@ -168,6 +179,9 @@ model Order_Line_Item {
 
   supplier_invoice_id String?
   supplier_invoice    Supplier_Invoice? @relation(fields: [supplier_invoice_id], references: [supplier_invoice_id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Supplier_Invoice {
@@ -190,6 +204,9 @@ model Client_Invoice {
   client_invoice_date              DateTime
 
   order Order @relation(fields: [client_invoice_id], references: [order_id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Commercial_Invoice {
@@ -199,4 +216,7 @@ model Commercial_Invoice {
   commercial_invoice_date   DateTime
 
   order Order @relation(fields: [commercial_invoice_id], references: [order_id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
