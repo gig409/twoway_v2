@@ -1,16 +1,3 @@
-import { Form, useFormAction, useNavigation } from 'react-router'
-import { Input } from '~/components/ui/input'
-import {
-	Description,
-	ErrorMessage,
-	Field,
-	FieldGroup,
-	Fieldset,
-	Label,
-	Legend,
-} from '~/components/ui/fieldset'
-import { Text } from '~/components/ui/text'
-import { Button } from '~/components/ui/button'
 import {
 	getInputProps,
 	useForm,
@@ -18,9 +5,21 @@ import {
 	type SubmissionResult,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
+// eslint-disable-next-line import/consistent-type-specifier-style
+import type { JsonValue } from '@prisma/client/runtime/library'
+import { Form, useFormAction, useNavigation } from 'react-router'
 import { z } from 'zod/v4' // Or, zod/v4 or zod/v4-mini
 import { GeneralErrorBoundary } from '~/components/error-boundary'
-import type { JsonValue } from '@prisma/client/runtime/library'
+import { Button } from '~/components/ui/button'
+import {
+	Description,
+	ErrorMessage,
+	Field,
+	FieldGroup,
+	Fieldset,
+	Label,
+} from '~/components/ui/fieldset'
+import { Input } from '~/components/ui/input'
 
 // Spinner component
 function Spinner({

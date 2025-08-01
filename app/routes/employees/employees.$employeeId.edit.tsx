@@ -7,39 +7,39 @@ import EmployeeForm, { schema } from './employeeForm'
 import prisma from '~/lib/prisma'
 
 export function meta({}: Route.MetaArgs) {
-    return [
-        { title: 'Edit Employee' },
-        { name: 'description', content: 'Edit employee information' },
-    ]
+	return [
+		{ title: 'Edit Employee' },
+		{ name: 'description', content: 'Edit employee information' },
+	]
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
-    const { employeeId } = params
+	const { employeeId } = params
 
-    try {
-        const employee = await prisma.employee.findUnique({
-            where: { employee_id: employeeId },            
-        })
+	try {
+		const employee = await prisma.employee.findUnique({
+			where: { employee_id: employeeId },
+		})
 
-        if (!employee) {
-            throw new Response('Employee not found', { status: 404 })
-        }
+		if (!employee) {
+			throw new Response('Employee not found', { status: 404 })
+		}
 
-        const companies = await prisma.company.findMany({
+		const companies = await prisma.company.findMany({
 			select: {
 				company_id: true,
 				company_name: true,
 			},
-        })
+		})
 
-        if (!companies) {
-            throw new Response('Companies not found', { status: 404 })
-        }
+		if (!companies) {
+			throw new Response('Companies not found', { status: 404 })
+		}
 
-        return { employee, companies }
-    } catch (error) {
-        throw new Response('Failed to load employee', { status: 500 })
-    }
+		return { employee, companies }
+	} catch (error) {
+		throw new Response('Failed to load employee', { status: 500 })
+	}
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
@@ -59,12 +59,12 @@ export async function action({ request, params }: Route.ActionArgs) {
 	// console.log("Form submission values:", { street_address, country, notes });
 	const {
 		employee_firstname,
-        employee_lastname,
-        employee_mobile,
-        employee_email,
-        employee_position,
-        position,
-        company_id,
+		employee_lastname,
+		employee_mobile,
+		employee_email,
+		employee_position,
+		position,
+		company_id,
 	} = submission.value
 
 	try {
@@ -75,11 +75,11 @@ export async function action({ request, params }: Route.ActionArgs) {
 			data: {
 				// company_id: crypto.randomUUID(),
 				employee_name: `${employee_firstname} ${employee_lastname}`.trim(),
-                employee_mobile,
-                employee_email,
-                employee_position,
-                position,
-                company_id,
+				employee_mobile,
+				employee_email,
+				employee_position,
+				position,
+				company_id,
 			},
 		})
 
@@ -95,22 +95,21 @@ export async function action({ request, params }: Route.ActionArgs) {
 }
 
 export default function EmployeeEdit({
-    loaderData,
-    actionData,
+	loaderData,
+	actionData,
 }: Route.ComponentProps) {
-    return (
-        <div>
-            <EmployeeForm
-                isEditing={true}
-                actionData={actionData}
-                loaderData={{ companies: loaderData.companies }}
-                employee={loaderData.employee}
-            ></EmployeeForm>
-        </div>
-    )
+	return (
+		<div>
+			<EmployeeForm
+				isEditing={true}
+				actionData={actionData}
+				loaderData={{ companies: loaderData.companies }}
+				employee={loaderData.employee}
+			></EmployeeForm>
+		</div>
+	)
 }
 
 export function ErrorBoundary() {
-    return <GeneralErrorBoundary />
+	return <GeneralErrorBoundary />
 }
-
