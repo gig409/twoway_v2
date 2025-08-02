@@ -107,6 +107,7 @@ model Quotation_Request {
 model Quotation_Request_Line_Item {
   quotation_request_line_item_id       String @id
   quotation_request_line_item_quantity Int
+  quotation_request_line_items_attributes Json?
 
   quotation_request_id String
   quotation_request    Quotation_Request    @relation(fields: [quotation_request_id], references: [quotation_request_id])

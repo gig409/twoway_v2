@@ -41,6 +41,7 @@ type QuotationSelect = Prisma.Quotation_RequestGetPayload<{
 		quotation_request_ref: true
 		quotation_request_date: true
 		quotation_request_vessel: true
+		createdAt: true
 		company: {
 			select: {
 				company_id: true
@@ -97,6 +98,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 				quotation_request_ref: true,
 				quotation_request_date: true,
 				quotation_request_vessel: true,
+				createdAt: true,
 				company: {
 					select: {
 						company_id: true,
