@@ -342,10 +342,10 @@ export default function QuotationsIndex({ loaderData }: Route.ComponentProps) {
 			<div className="rounded-lg bg-white shadow-lg">
 				{/* Header */}
 				<div className="border-b border-gray-200 px-6 py-4">
-					<Heading>Employees</Heading>
+					<Heading>Quotation Requests</Heading>
 					<Text>
-						Manage and view all employee profiles with their preferences and
-						task counts
+						Manage and view all quotation requests with their details and
+						statuses
 					</Text>
 				</div>
 
