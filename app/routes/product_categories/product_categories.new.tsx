@@ -54,7 +54,9 @@ export async function action({ request }: Route.ActionArgs) {
 			},
 		})
 
-		return redirect('/dashboard/product_categories')
+		return redirect(
+			'/dashboard/product_categories?success=Product category created successfully!',
+		)
 	} catch (error) {
 		console.error('Failed to create product category:', error)
 		return submission.reply({

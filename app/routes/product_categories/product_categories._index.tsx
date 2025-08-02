@@ -189,18 +189,19 @@ export default function ProductCategoriesIndex({
 			</div>
 			<Table striped>
 				<TableHead>
-					{table
-						.getHeaderGroups()
-						.map((headerGroup) =>
-							headerGroup.headers.map((header) => (
-								<TableHeader onClick={header.column.getToggleSortingHandler()}>
-									{flexRender(
-										header.column.columnDef.header,
-										header.getContext(),
-									)}
-								</TableHeader>
-							)),
-						)}
+					{table.getHeaderGroups().map((headerGroup) =>
+						headerGroup.headers.map((header) => (
+							<TableHeader
+								key={headerGroup.id}
+								onClick={header.column.getToggleSortingHandler()}
+							>
+								{flexRender(
+									header.column.columnDef.header,
+									header.getContext(),
+								)}
+							</TableHeader>
+						)),
+					)}
 					<TableHeader></TableHeader>
 				</TableHead>
 				<TableBody>
