@@ -1,37 +1,45 @@
 import { parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 import { redirect } from 'react-router'
 // eslint-disable-next-line import/consistent-type-specifier-style
-import type { Route } from '../product_categories/+types/product_categories.$categoryId.edit'
-import ProductCategoryForm, { FormSchema } from './product_categories_form'
+import type { Route } from '../products/+types/products.$productId.edit'
+import ProductForm, { FormSchema } from './productForm'
 import prisma from '~/lib/prisma'
 
 export function meta({}: Route.MetaArgs) {
 	return [
-		{ title: 'Edit Product Category' },
-		{ name: 'description', content: 'Add/Edit product category information' },
+		{ title: 'Edit Product' },
+		{ name: 'description', content: 'Add/Edit product information' },
 	]
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
-	const { categoryId } = params
+	const { productId } = params
 
 	try {
-		const product_category = await prisma.productCategory.findUnique({
-			where: { product_category_id: categoryId },
+		const product = await prisma.product.findUnique({
+			where: { product_id: productId },
 		})
 
-		if (!product_category) {
-			throw new Response('Product category not found', { status: 404 })
+		if (!product) {
+			throw new Response('Product not found', { status: 404 })
 		}
 
-		return { product_category }
+		const product_categories = await prisma.productCategory.findMany({
+			select: {
+				product_category_id: true,
+				product_category_name: true,
+				product_category_attributes: true,
+			},
+		})
+
+		return { product, product_categories }
 	} catch (error) {
-		throw new Response('Failed to load product category', { status: 500 })
+		throw new Response('Failed to load product', { status: 500 })
 	}
 }
 
 export async function action({ request, params }: Route.ActionArgs) {
-	const { categoryId } = params
+	const { productId } = params
 	const formData = await request.formData()
 
 	const submission = parseWithZod(formData, {
@@ -45,15 +53,16 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 	// const { street_address, country, notes } = submission.value;
 	// console.log("Form submission values:", { street_address, country, notes });
-	const { product_category_name, product_category_attributes } =
-		submission.value
+	const {
+		product_name,
+		product_description,
+		product_attributes,
+		product_category_id,
+	} = submission.value
 
 	const JsonAttributes: Record<string, string> = {}
-	if (
-		product_category_attributes &&
-		Array.isArray(product_category_attributes)
-	) {
-		product_category_attributes.forEach(({ key, value }) => {
+	if (product_attributes && Array.isArray(product_attributes)) {
+		product_attributes.forEach(({ key, value }) => {
 			if (key?.trim() && value?.trim()) {
 				JsonAttributes[key.trim()] = value.trim()
 			}
@@ -61,20 +70,19 @@ export async function action({ request, params }: Route.ActionArgs) {
 	}
 
 	try {
-		await prisma.productCategory.update({
+		await prisma.product.update({
 			where: {
-				product_category_id: categoryId,
+				product_id: productId,
 			},
 			data: {
-				// product_category_id: crypto.randomUUID(),
-				product_category_name,
-				product_category_attributes: JsonAttributes,
+				product_name,
+				product_description,
+				product_attributes: JsonAttributes,
+				product_category_id,
 			},
 		})
 
-		return redirect(
-			'/dashboard/product_categories?success=Product category updated successfully!',
-		)
+		return redirect('/dashboard/products?success=Product updated successfully!')
 	} catch (error) {
 		console.error('Failed to create product category:', error)
 		return submission.reply({
@@ -89,11 +97,12 @@ export default function CategoryEdit({
 }: Route.ComponentProps) {
 	return (
 		<div>
-			<ProductCategoryForm
+			<ProductForm
 				isEditing={true}
 				actionData={actionData}
-				product_category={loaderData.product_category}
-			></ProductCategoryForm>
+				loaderData={loaderData}
+				product={loaderData.product}
+			></ProductForm>
 		</div>
 	)
 }
