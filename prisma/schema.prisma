@@ -129,6 +129,7 @@ model Supplier_Quotation {
   supplier_quotation_client_price   Float
   supplier_quotation_accepted       Boolean
   supplier_quotation_status         Int
+  supplier_quotation_notes          String?
 
   company_id String
   company    Company @relation(fields: [company_id], references: [company_id])
