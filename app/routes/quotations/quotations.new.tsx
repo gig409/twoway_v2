@@ -2,7 +2,7 @@ import { parseWithZod } from '@conform-to/zod/v4'
 import { redirect } from 'react-router'
 // eslint-disable-next-line import/consistent-type-specifier-style
 import type { Route } from '../quotations/+types/quotations.new'
-import QuotationForm, { QuotationFormSchema } from './quotationsForm'
+import QuotationForm, { getQuotationFormSchema } from './quotationsForm'
 import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { Heading } from '~/components/ui/heading'
 import { Text } from '~/components/ui/text'
@@ -55,8 +55,20 @@ export async function loader() {
 
 export async function action({ request }: Route.ActionArgs) {
 	const formData = await request.formData()
+
+	// Get existing products for validation (including product_id)
+	const existingProducts = await prisma.product.findMany({
+		select: {
+			product_id: true,
+			product_name: true,
+			product_attributes: true,
+		},
+	})
+
+	const schemaWithValidations = getQuotationFormSchema(existingProducts)
+
 	const submission = parseWithZod(formData, {
-		schema: QuotationFormSchema,
+		schema: schemaWithValidations,
 	})
 
 	if (submission.status !== 'success') {
@@ -103,8 +115,17 @@ export async function action({ request }: Route.ActionArgs) {
 							product_ref_number: 1, // Default ref number - you may want to implement auto-increment
 							product_description: item.new_product_description || null,
 							product_category_id: item.new_product_category_id || '', // Required field
-							product_attributes: item.attributes && item.attributes.length > 0 ? 
-								Object.fromEntries(item.attributes.map(attr => [attr.key, attr.value])) : undefined,
+							product_attributes:
+								item.attributes && item.attributes.length > 0
+									? Object.fromEntries(
+											item.attributes.map(
+												(attr: { key: string; value: string }) => [
+													attr.key,
+													attr.value,
+												],
+											),
+										)
+									: undefined,
 						},
 					})
 					productId = newProduct.product_id
@@ -114,9 +135,19 @@ export async function action({ request }: Route.ActionArgs) {
 				await tx.quotation_Request_Line_Item.create({
 					data: {
 						quotation_request_line_item_id: crypto.randomUUID(),
-						quotation_request_line_item_quantity: item.quotation_request_line_item_quantity,
-						quotation_request_line_items_attributes: item.attributes && item.attributes.length > 0 ? 
-							Object.fromEntries(item.attributes.map(attr => [attr.key, attr.value])) : undefined,
+						quotation_request_line_item_quantity:
+							item.quotation_request_line_item_quantity,
+						quotation_request_line_items_attributes:
+							item.attributes && item.attributes.length > 0
+								? Object.fromEntries(
+										item.attributes.map(
+											(attr: { key: string; value: string }) => [
+												attr.key,
+												attr.value,
+											],
+										),
+									)
+								: undefined,
 						quotation_request_id: quotationRequestId,
 						product_id: productId,
 					},

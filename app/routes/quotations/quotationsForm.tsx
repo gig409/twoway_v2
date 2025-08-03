@@ -22,6 +22,18 @@ import {
 import { Input } from '~/components/ui/input'
 import { Select } from '~/components/ui/select'
 
+// Form validation constants
+const MAX_LINE_ITEMS = 50
+const MAX_LINE_ITEMS_FOR_VALIDATION = 10 // For performance reasons, validate only first 10 items
+const MAX_ATTRIBUTES_PER_ITEM = 20
+const MAX_QUANTITY = 10000
+const MIN_QUANTITY = 1
+const MAX_ATTRIBUTE_KEY_LENGTH = 100
+const MAX_ATTRIBUTE_VALUE_LENGTH = 500
+const MAX_REFERENCE_LENGTH = 50
+const MIN_VESSEL_NAME_LENGTH = 2
+const MAX_VESSEL_NAME_LENGTH = 100
+
 type QuotationSelect = Prisma.Quotation_RequestGetPayload<{
 	select: {
 		quotation_request_id: true
@@ -93,7 +105,7 @@ export const QuotationFormSchema = z.object({
 	quotation_request_ref: z
 		.string({ error: 'Reference is required' })
 		.min(1, 'Reference must not be empty')
-		.max(50, 'Reference must be max 50 characters'),
+		.max(MAX_REFERENCE_LENGTH, 'Reference must be max 50 characters'),
 
 	quotation_request_date: z
 		.string({ error: 'Date is required' })
@@ -103,8 +115,8 @@ export const QuotationFormSchema = z.object({
 
 	quotation_request_vessel: z
 		.string({ error: 'Vessel name is required' })
-		.min(2, 'Vessel name must be at least 2 characters')
-		.max(100, 'Vessel name must be max 100 characters'),
+		.min(MIN_VESSEL_NAME_LENGTH, 'Vessel name must be at least 2 characters')
+		.max(MAX_VESSEL_NAME_LENGTH, 'Vessel name must be max 100 characters'),
 
 	// Company selection (dropdown)
 	company_id: z
@@ -138,8 +150,8 @@ export const QuotationFormSchema = z.object({
 				quotation_request_line_item_quantity: z
 					.number({ error: 'Quantity is required' })
 					.int('Quantity must be a whole number')
-					.min(1, 'Quantity must be at least 1')
-					.max(10000, 'Quantity cannot exceed 10,000'),
+					.min(MIN_QUANTITY, 'Quantity must be at least 1')
+					.max(MAX_QUANTITY, 'Quantity cannot exceed 10,000'),
 
 				// Dynamic attributes (key-value pairs)
 				attributes: z
@@ -148,24 +160,318 @@ export const QuotationFormSchema = z.object({
 							key: z
 								.string({ error: 'Attribute key is required' })
 								.min(1, 'Attribute key cannot be empty')
-								.max(100, 'Attribute key too long'),
+								.max(MAX_ATTRIBUTE_KEY_LENGTH, 'Attribute key too long'),
 							value: z
 								.string({ error: 'Attribute value is required' })
 								.min(1, 'Attribute value cannot be empty')
-								.max(500, 'Attribute value too long'),
+								.max(MAX_ATTRIBUTE_VALUE_LENGTH, 'Attribute value too long'),
 							_isProductAttribute: z.string().optional(), // Flag for read-only keys (string 'true'/'false')
 						}),
 					)
 					.optional()
-					.default([]),
-
-				// Optional: Mark for deletion (when editing)
+					.default([]), // Optional: Mark for deletion (when editing)
 				_action: z.enum(['keep', 'delete']).optional(),
 			}),
 		)
 		.min(1, 'At least one line item is required')
-		.max(50, 'Cannot exceed 50 line items'),
+		.max(MAX_LINE_ITEMS, 'Cannot exceed 50 line items'),
 })
+
+// Create a function to get the schema with runtime validations
+export const getQuotationFormSchema = (
+	existingProducts?: {
+		product_id: string
+		product_name: string
+		product_attributes?: any
+	}[],
+) => {
+	let schemaWithValidation = QuotationFormSchema
+
+	// Add validation for new product names against database
+	if (existingProducts) {
+		const existingProductNames = new Set(
+			existingProducts.map((p) => p.product_name.toLowerCase().trim()),
+		)
+
+		// Apply validation for multiple line items (up to a reasonable limit)
+		for (let i = 0; i < MAX_LINE_ITEMS_FOR_VALIDATION; i++) {
+			// Validate new_product_name is required when product_id === 'new'
+			schemaWithValidation = schemaWithValidation.refine(
+				(data) => {
+					const lineItem = data.quotation_request_line_items[i]
+					if (!lineItem || lineItem.product_id !== 'new') {
+						return true // Not a new product, validation passes
+					}
+
+					// For new products, product name is required
+					return (
+						lineItem.new_product_name &&
+						lineItem.new_product_name.trim().length > 0
+					)
+				},
+				{
+					message: 'Product name is required when creating a new product',
+					path: ['quotation_request_line_items', i, 'new_product_name'],
+				},
+			)
+
+			// Validate new_product_category_id is required when product_id === 'new'
+			schemaWithValidation = schemaWithValidation.refine(
+				(data) => {
+					const lineItem = data.quotation_request_line_items[i]
+					if (!lineItem || lineItem.product_id !== 'new') {
+						return true // Not a new product, validation passes
+					}
+
+					// For new products, category is required
+					return (
+						lineItem.new_product_category_id &&
+						lineItem.new_product_category_id.trim().length > 0
+					)
+				},
+				{
+					message: 'Product category is required when creating a new product',
+					path: ['quotation_request_line_items', i, 'new_product_category_id'],
+				},
+			)
+
+			// Optional: Validate new_product_ref has minimum length if provided
+			schemaWithValidation = schemaWithValidation.refine(
+				(data) => {
+					const lineItem = data.quotation_request_line_items[i]
+					if (
+						!lineItem ||
+						lineItem.product_id !== 'new' ||
+						!lineItem.new_product_ref
+					) {
+						return true // Not applicable
+					}
+
+					// If product ref is provided, it should meet minimum requirements
+					return lineItem.new_product_ref.trim().length >= 2
+				},
+				{
+					message:
+						'Product reference must be at least 2 characters if provided',
+					path: ['quotation_request_line_items', i, 'new_product_ref'],
+				},
+			)
+
+			schemaWithValidation = schemaWithValidation.refine(
+				(data) => {
+					// Check if this line item index exists and is a new product
+					if (
+						data.quotation_request_line_items[i] &&
+						data.quotation_request_line_items[i].product_id === 'new' &&
+						data.quotation_request_line_items[i].new_product_name
+					) {
+						const newProductName = data.quotation_request_line_items[i]
+							.new_product_name!.toLowerCase()
+							.trim()
+						return !existingProductNames.has(newProductName)
+					}
+					return true
+				},
+				{
+					message: 'A product with this name already exists in the database',
+					path: ['quotation_request_line_items', i, 'new_product_name'],
+				},
+			)
+		}
+	}
+
+	// Add validation to prevent duplicate product names within the same form (new products)
+	for (let i = 0; i < MAX_LINE_ITEMS_FOR_VALIDATION; i++) {
+		schemaWithValidation = schemaWithValidation.refine(
+			(data) => {
+				const currentLineItem = data.quotation_request_line_items[i]
+				if (
+					!currentLineItem ||
+					currentLineItem.product_id !== 'new' ||
+					!currentLineItem.new_product_name
+				) {
+					return true
+				}
+
+				const currentProductName = currentLineItem.new_product_name
+					.toLowerCase()
+					.trim()
+
+				// Check against all other line items in the form
+				for (let j = 0; j < data.quotation_request_line_items.length; j++) {
+					if (i === j) continue // Skip self comparison
+
+					const otherLineItem = data.quotation_request_line_items[j]
+					if (!otherLineItem) continue
+
+					let otherProductName: string | null = null
+
+					// Check against other new products
+					if (
+						otherLineItem.product_id === 'new' &&
+						otherLineItem.new_product_name
+					) {
+						otherProductName = otherLineItem.new_product_name
+							.toLowerCase()
+							.trim()
+					}
+					// Check against existing products
+					else if (
+						otherLineItem.product_id &&
+						otherLineItem.product_id !== 'new' &&
+						existingProducts
+					) {
+						const existingProduct = existingProducts.find(
+							(p) => p.product_id === otherLineItem.product_id,
+						)
+						if (existingProduct) {
+							otherProductName = existingProduct.product_name
+								.toLowerCase()
+								.trim()
+						}
+					}
+
+					if (otherProductName && currentProductName === otherProductName) {
+						return false // Duplicate found within the form
+					}
+				}
+
+				return true
+			},
+			{
+				message:
+					'Product names must be unique within the same quotation. This product name is already used in another line item.',
+				path: ['quotation_request_line_items', i, 'new_product_name'],
+			},
+		)
+	}
+
+	// Add validation to prevent duplicate product names within the same form (existing products)
+	for (let i = 0; i < MAX_LINE_ITEMS_FOR_VALIDATION; i++) {
+		schemaWithValidation = schemaWithValidation.refine(
+			(data) => {
+				const currentLineItem = data.quotation_request_line_items[i]
+				if (
+					!currentLineItem ||
+					currentLineItem.product_id === 'new' ||
+					!currentLineItem.product_id ||
+					!existingProducts
+				) {
+					return true
+				}
+
+				const currentProduct = existingProducts.find(
+					(p) => p.product_id === currentLineItem.product_id,
+				)
+				if (!currentProduct) return true
+
+				const currentProductName = currentProduct.product_name
+					.toLowerCase()
+					.trim()
+
+				// Check against all other line items in the form
+				for (let j = 0; j < data.quotation_request_line_items.length; j++) {
+					if (i === j) continue // Skip self comparison
+
+					const otherLineItem = data.quotation_request_line_items[j]
+					if (!otherLineItem) continue
+
+					let otherProductName: string | null = null
+
+					// Check against new products
+					if (
+						otherLineItem.product_id === 'new' &&
+						otherLineItem.new_product_name
+					) {
+						otherProductName = otherLineItem.new_product_name
+							.toLowerCase()
+							.trim()
+					}
+					// Check against other existing products
+					else if (
+						otherLineItem.product_id &&
+						otherLineItem.product_id !== 'new'
+					) {
+						const existingProduct = existingProducts.find(
+							(p) => p.product_id === otherLineItem.product_id,
+						)
+						if (existingProduct) {
+							otherProductName = existingProduct.product_name
+								.toLowerCase()
+								.trim()
+						}
+					}
+
+					if (otherProductName && currentProductName === otherProductName) {
+						return false // Duplicate found within the form
+					}
+				}
+
+				return true
+			},
+			{
+				message:
+					'Product names must be unique within the same quotation. This product name is already used in another line item.',
+				path: ['quotation_request_line_items', i, 'product_id'],
+			},
+		)
+	}
+
+	// Add duplicate attribute key validation for each line item
+	for (
+		let lineItemIndex = 0;
+		lineItemIndex < MAX_LINE_ITEMS_FOR_VALIDATION;
+		lineItemIndex++
+	) {
+		// For each line item, check for duplicate attribute keys
+		for (let attrIndex = 0; attrIndex < MAX_ATTRIBUTES_PER_ITEM; attrIndex++) {
+			schemaWithValidation = schemaWithValidation.refine(
+				(data) => {
+					const lineItem = data.quotation_request_line_items[lineItemIndex]
+					if (
+						!lineItem ||
+						!lineItem.attributes ||
+						lineItem.attributes.length <= attrIndex
+					) {
+						return true
+					}
+
+					const currentAttr = lineItem.attributes[attrIndex]
+					if (
+						!currentAttr ||
+						!currentAttr.key ||
+						currentAttr.key.trim() === ''
+					) {
+						return true
+					}
+
+					const currentKey = currentAttr.key.toLowerCase().trim()
+
+					// Check if this key appears elsewhere in the same product's attributes
+					const duplicateFound = lineItem.attributes.some((attr, index) => {
+						if (index === attrIndex || !attr || !attr.key) return false
+						return attr.key.toLowerCase().trim() === currentKey
+					})
+
+					return !duplicateFound
+				},
+				{
+					message:
+						'Duplicate attribute key - each key must be unique within this product',
+					path: [
+						'quotation_request_line_items',
+						lineItemIndex,
+						'attributes',
+						attrIndex,
+						'key',
+					],
+				},
+			)
+		}
+	}
+
+	return schemaWithValidation
+}
 
 // Type inference from the schema
 export type QuotationFormData = z.infer<typeof QuotationFormSchema>
@@ -187,9 +493,11 @@ export default function QuotationForm({
 	const [form, fields] = useForm({
 		id: 'quotation-form', // Fixed ID
 		lastResult: actionData,
-		constraint: getZodConstraint(QuotationFormSchema), // Use the new schema
+		constraint: getZodConstraint(QuotationFormSchema), // Use the base schema for constraints
 		onValidate({ formData }) {
-			return parseWithZod(formData, { schema: QuotationFormSchema })
+			// Use the enhanced schema with runtime validations
+			const schemaWithValidations = getQuotationFormSchema(loaderData?.products)
+			return parseWithZod(formData, { schema: schemaWithValidations })
 		},
 		shouldRevalidate: 'onBlur',
 		// Default values for editing
@@ -209,7 +517,19 @@ export default function QuotationForm({
 							product_id: item.product.product_id,
 							quotation_request_line_item_quantity:
 								item.quotation_request_line_item_quantity,
-							attributes: [], // Initialize with empty attributes for editing
+							// Map through existing product attributes instead of empty array
+							attributes:
+								item.product.product_attributes &&
+								typeof item.product.product_attributes === 'object' &&
+								item.product.product_attributes !== null
+									? Object.entries(item.product.product_attributes).map(
+											([key, value]) => ({
+												key: key,
+												value: String(value || ''),
+												_isProductAttribute: 'true', // Mark as product attributes
+											}),
+										)
+									: [], // Fallback to empty array if no attributes
 							_action: 'keep' as const,
 						})),
 				}
@@ -249,7 +569,7 @@ export default function QuotationForm({
 			<Fieldset>
 				<FieldGroup>
 					{/* Basic quotation fields */}
-					<Field>
+					<Field className="text-left">
 						<Label htmlFor={fields.quotation_request_ref.id}>Reference</Label>
 						<Input
 							{...getInputProps(fields.quotation_request_ref, { type: 'text' })}
@@ -260,7 +580,7 @@ export default function QuotationForm({
 						)}
 					</Field>
 
-					<Field>
+					<Field className="text-left">
 						<Label htmlFor={fields.quotation_request_date.id}>Date</Label>
 						<Input
 							{...getInputProps(fields.quotation_request_date, {
@@ -274,7 +594,7 @@ export default function QuotationForm({
 						)}
 					</Field>
 
-					<Field>
+					<Field className="text-left">
 						<Label htmlFor={fields.quotation_request_vessel.id}>Vessel</Label>
 						<Input
 							{...getInputProps(fields.quotation_request_vessel, {
@@ -289,7 +609,7 @@ export default function QuotationForm({
 						)}
 					</Field>
 
-					<Field>
+					<Field className="text-left">
 						<Label htmlFor={fields.company_id.id}>Company</Label>
 						<Select
 							{...getSelectProps(fields.company_id)}
@@ -313,7 +633,7 @@ export default function QuotationForm({
 						)}
 					</Field>
 
-					<Field>
+					<Field className="text-left">
 						<Label htmlFor={fields.employee_id.id}>Employee</Label>
 						<Select {...getSelectProps(fields.employee_id)}>
 							<option value="">Select an employee</option>
@@ -335,7 +655,40 @@ export default function QuotationForm({
 				<legend className="text-base leading-6 font-semibold text-gray-900">
 					Line Items
 				</legend>
-
+				{/* Enhanced error display */}
+				{(fields.quotation_request_line_items.errors ||
+					form.errors?.length) && (
+					<div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3">
+						<div className="flex">
+							<div className="flex-shrink-0">
+								<svg
+									className="h-5 w-5 text-red-400"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+								>
+									<path
+										fillRule="evenodd"
+										d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+										clipRule="evenodd"
+									/>
+								</svg>
+							</div>
+							<div className="ml-3">
+								<h3 className="text-sm font-medium text-red-800">
+									Validation Error
+								</h3>
+								<div className="mt-1 text-sm text-red-700">
+									{fields.quotation_request_line_items.errors && (
+										<p>{fields.quotation_request_line_items.errors}</p>
+									)}
+									{form.errors?.map((error, index) => (
+										<p key={index}>{error}</p>
+									))}
+								</div>
+							</div>
+						</div>
+					</div>
+				)}
 				{lineItemsList.map((lineItemField, index) => {
 					const lineItemFields = lineItemField.getFieldset()
 					const attributesList = lineItemFields.attributes.getFieldList()
@@ -363,7 +716,7 @@ export default function QuotationForm({
 							</div>
 
 							{/* Product Selection */}
-							<Field>
+							<Field className="text-left">
 								<Label htmlFor={lineItemFields.product_id.id}>Product</Label>
 								<Select
 									{...getSelectProps(lineItemFields.product_id)}
@@ -446,7 +799,7 @@ export default function QuotationForm({
 							{/* New Product Fields - only show when "New Product" is selected */}
 							{lineItemFields.product_id.value === 'new' && (
 								<>
-									<Field>
+									<Field className="text-left">
 										<Label htmlFor={lineItemFields.new_product_category_id.id}>
 											Product Category
 										</Label>
@@ -465,9 +818,14 @@ export default function QuotationForm({
 												</option>
 											))}
 										</Select>
+										{lineItemFields.new_product_category_id.errors && (
+											<ErrorMessage>
+												{lineItemFields.new_product_category_id.errors}
+											</ErrorMessage>
+										)}
 									</Field>
 
-									<Field>
+									<Field className="text-left">
 										<Label htmlFor={lineItemFields.new_product_name.id}>
 											Product Name
 										</Label>
@@ -477,9 +835,14 @@ export default function QuotationForm({
 											})}
 											placeholder="Enter new product name"
 										/>
+										{lineItemFields.new_product_name.errors && (
+											<ErrorMessage>
+												{lineItemFields.new_product_name.errors}
+											</ErrorMessage>
+										)}
 									</Field>
 
-									<Field>
+									<Field className="text-left">
 										<Label htmlFor={lineItemFields.new_product_ref.id}>
 											Product Reference
 										</Label>
@@ -489,9 +852,14 @@ export default function QuotationForm({
 											})}
 											placeholder="Enter product reference number"
 										/>
+										{lineItemFields.new_product_ref.errors && (
+											<ErrorMessage>
+												{lineItemFields.new_product_ref.errors}
+											</ErrorMessage>
+										)}
 									</Field>
 
-									<Field>
+									<Field className="text-left">
 										<Label htmlFor={lineItemFields.new_product_description.id}>
 											Product Description
 										</Label>
@@ -507,7 +875,7 @@ export default function QuotationForm({
 							)}
 
 							{/* Quantity */}
-							<Field>
+							<Field className="text-left">
 								<Label
 									htmlFor={
 										lineItemFields.quotation_request_line_item_quantity.id
@@ -520,8 +888,8 @@ export default function QuotationForm({
 										lineItemFields.quotation_request_line_item_quantity,
 										{ type: 'number' },
 									)}
-									min="1"
-									max="10000"
+									min={MIN_QUANTITY.toString()}
+									max={MAX_QUANTITY.toString()}
 								/>
 								{lineItemFields.quotation_request_line_item_quantity.errors && (
 									<ErrorMessage>
@@ -661,7 +1029,6 @@ export default function QuotationForm({
 							)}
 							<input
 								{...getInputProps(lineItemFields._action, { type: 'hidden' })}
-								value="keep"
 							/>
 						</FieldGroup>
 					)
@@ -683,6 +1050,7 @@ export default function QuotationForm({
 									new_product_name: '',
 									new_product_ref: '',
 									new_product_description: '',
+									_action: 'keep',
 								},
 							})
 						}}
@@ -696,7 +1064,7 @@ export default function QuotationForm({
 			<div className="flex gap-4">
 				<Button type="submit" disabled={isPending}>
 					{isPending && <Spinner />}
-					{isPending ? 'Saving...' : 'Save Quotation'}
+					{isPending ? 'Saving...' : _isEditing ? 'Edit Quotation' : 'Create Quotation'}
 				</Button>
 
 				<Button type="button" outline>
