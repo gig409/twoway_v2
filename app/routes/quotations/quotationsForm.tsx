@@ -93,7 +93,6 @@ interface QuotationFormProps {
 		productCategories: {
 			product_category_id: string
 			product_category_name: string
-			product_category_attributes: any
 		}[]
 	}
 }
