@@ -1,6 +1,3 @@
-import type { Prisma } from 'generated/prisma/client'
-
-
 export default function SupplierQuotationsIndex() {
 	return (
 		<div>

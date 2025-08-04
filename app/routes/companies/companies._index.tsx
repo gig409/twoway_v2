@@ -112,7 +112,7 @@ export default function CompaniesIndex({ loaderData }: Route.ComponentProps) {
 		return [
 			columnHelper.accessor('company_name', {
 				header: () => 'Company Name',
-				cell: (info) => (info.getValue() as string).toUpperCase(),
+				cell: (info) => info.getValue(),
 			}),
 			columnHelper.accessor('company_email', {
 				header: () => 'Email',
