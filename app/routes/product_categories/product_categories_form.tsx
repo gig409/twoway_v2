@@ -12,7 +12,6 @@ import { z } from 'zod/v4' // Or, zod/v4 or zod/v4-mini
 import { GeneralErrorBoundary } from '~/components/error-boundary'
 import { Button } from '~/components/ui/button'
 import {
-	Description,
 	ErrorMessage,
 	Field,
 	FieldGroup,
@@ -54,7 +53,6 @@ function Spinner({
 type ProductCategory = {
 	product_category_id: string
 	product_category_name: string
-	product_category_attributes: JsonValue
 }
 
 interface ProductCategoryFormProps {
@@ -68,14 +66,6 @@ export const FormSchema = z.object({
 		.string({ error: 'Product category name is required' })
 		.min(2, 'Must be min 2 chars')
 		.max(100, 'Must be max 100 chars'),
-	product_category_attributes: z
-		.array(
-			z.object({
-				key: z.string({ error: 'Key is required' }),
-				value: z.string({ error: 'Value is required' }),
-			}),
-		)
-		.optional(),
 })
 
 export default function ProductCategoryForm({
@@ -89,11 +79,6 @@ export default function ProductCategoryForm({
 		navigation.state !== 'idle' &&
 		navigation.formAction === formAction &&
 		navigation.formMethod === 'POST'
-	const attributes = product_category?.product_category_attributes || {}
-	const defualtAttributes = Object.entries(attributes).map(([key, value]) => ({
-		key,
-		value,
-	}))
 
 	const [form, fields] = useForm({
 		id: 'my-form',
@@ -107,18 +92,11 @@ export default function ProductCategoryForm({
 			isEditing && product_category
 				? {
 						product_category_name: product_category.product_category_name,
-						product_category_attributes: defualtAttributes,
 					}
 				: {
 						product_category_name: '',
-						product_category_attributes: [{ key: '', value: '' }],
 					},
 	})
-
-	const attrubutesList = fields.product_category_attributes.getFieldList()
-
-	console.log('Form submission errors:', actionData)
-	console.log('Fields:', fields)
 
 	return (
 		<div className="overflow-hidden rounded-lg bg-white shadow-sm">
@@ -143,82 +121,6 @@ export default function ProductCategoryForm({
 									</ErrorMessage>
 								)}
 							</Field>
-							<FieldGroup>
-								<Field className="text-left">
-									<Label htmlFor={fields.product_category_attributes.id}>
-										Product Category Attributes
-									</Label>
-									<Description>Optional attributes.</Description>
-									{attrubutesList.map((field, index) => {
-										const attributeFields = field.getFieldset()
-										return (
-											<Fieldset key={field.key}>
-												<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-													<Field>
-														<Label htmlFor={attributeFields.key.id}>
-															Attribute Key
-														</Label>
-														<Input
-															{...getInputProps(attributeFields.key, {
-																type: 'text',
-															})}
-															invalid={!!attributeFields.key.errors}
-															placeholder="Enter attribute key"
-														/>
-														{attributeFields.key.errors && (
-															<ErrorMessage>
-																{attributeFields.key.errors}
-															</ErrorMessage>
-														)}
-													</Field>
-													<Field>
-														<Label htmlFor={attributeFields.value.id}>
-															Attribute Value
-														</Label>
-														<Input
-															{...getInputProps(attributeFields.value, {
-																type: 'text',
-															})}
-															invalid={!!attributeFields.value.errors}
-															placeholder="Enter attribute value"
-														/>
-														{attributeFields.value.errors && (
-															<ErrorMessage>
-																{attributeFields.value.errors}
-															</ErrorMessage>
-														)}
-													</Field>
-												</div>
-												<Button
-													type="button"
-													onClick={() =>
-														form.remove({
-															name: fields.product_category_attributes.name,
-															index,
-														})
-													}
-													disabled={attrubutesList.length === 0}
-												>
-													Remove Attribute
-												</Button>
-											</Fieldset>
-										)
-									})}
-									{fields.product_category_attributes.errors && (
-										<ErrorMessage>
-											{fields.product_category_attributes.errors}
-										</ErrorMessage>
-									)}
-								</Field>
-							</FieldGroup>
-							<Button
-								type="button"
-								onClick={() =>
-									form.insert({ name: fields.product_category_attributes.name })
-								}
-							>
-								Add Attribute
-							</Button>
 						</FieldGroup>
 						{form.errors && (
 							<div className="rounded-md bg-red-50 p-4">

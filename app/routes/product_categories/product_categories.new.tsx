@@ -30,27 +30,13 @@ export async function action({ request }: Route.ActionArgs) {
 		return submission.reply()
 	}
 
-	const { product_category_name, product_category_attributes } =
-		submission.value
-
-	const JsonAttributes: Record<string, string> = {}
-	if (
-		product_category_attributes &&
-		Array.isArray(product_category_attributes)
-	) {
-		product_category_attributes.forEach(({ key, value }) => {
-			if (key?.trim() && value?.trim()) {
-				JsonAttributes[key.trim()] = value.trim()
-			}
-		})
-	}
+	const { product_category_name } = submission.value
 
 	try {
 		await prisma.productCategory.create({
 			data: {
 				product_category_id: crypto.randomUUID(),
 				product_category_name,
-				product_category_attributes: JsonAttributes,
 			},
 		})
 

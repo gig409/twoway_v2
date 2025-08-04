@@ -35,7 +35,6 @@ import prisma from '~/lib/prisma'
 type ProductCategory = {
 	product_category_id: string
 	product_category_name: string
-	product_category_attributes: JsonValue
 }
 
 const customFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
@@ -113,21 +112,6 @@ export default function ProductCategoriesIndex({
 			columnHelper.accessor('product_category_name', {
 				header: () => <Strong>Product Category Name</Strong>,
 				cell: (info) => <Text>{info.getValue()}</Text>,
-			}),
-			columnHelper.accessor('product_category_attributes', {
-				header: () => <Strong>Attributes</Strong>,
-				cell: (info) => {
-					let result: String = ''
-					const value = info.getValue() as String
-					for (const key in value) {
-						result += `${key}: ${value[key]}\n`
-					}
-					return (
-						<Text className="break-words whitespace-pre-wrap">
-							{result ? result : 'N/A'}
-						</Text>
-					)
-				},
 			}),
 			columnHelper.accessor('product_category_id', {
 				header: () => <Strong>Actions</Strong>,

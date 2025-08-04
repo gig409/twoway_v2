@@ -45,20 +45,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 
 	// const { street_address, country, notes } = submission.value;
 	// console.log("Form submission values:", { street_address, country, notes });
-	const { product_category_name, product_category_attributes } =
-		submission.value
-
-	const JsonAttributes: Record<string, string> = {}
-	if (
-		product_category_attributes &&
-		Array.isArray(product_category_attributes)
-	) {
-		product_category_attributes.forEach(({ key, value }) => {
-			if (key?.trim() && value?.trim()) {
-				JsonAttributes[key.trim()] = value.trim()
-			}
-		})
-	}
+	const { product_category_name } = submission.value
 
 	try {
 		await prisma.productCategory.update({
@@ -66,9 +53,7 @@ export async function action({ request, params }: Route.ActionArgs) {
 				product_category_id: categoryId,
 			},
 			data: {
-				// product_category_id: crypto.randomUUID(),
 				product_category_name,
-				product_category_attributes: JsonAttributes,
 			},
 		})
 

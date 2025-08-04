@@ -77,7 +77,6 @@ model Product {
 model ProductCategory {
   product_category_id         String @id
   product_category_name       String
-  product_category_attributes Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
