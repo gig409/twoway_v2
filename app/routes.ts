@@ -70,6 +70,17 @@ export default [
 					),
 				]),
 			]),
+			// Supplier Quotations routes
+			layout('./routes/supplier_quotations/supplier_quotations_layout.tsx', [
+				...prefix('supplier_quotations', [
+					index('./routes/supplier_quotations/supplier_quotations._index.tsx'),
+					route('new', './routes/supplier_quotations/supplier_quotations.new.tsx'),
+					route(
+						':quotationId/edit',
+						'./routes/supplier_quotations/supplier_quotations.$quotationId.edit.tsx',
+					),
+				]),
+			]),
 		]),
 	]),
 ] satisfies RouteConfig
