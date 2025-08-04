@@ -45,7 +45,7 @@ async function main() {
 				data: {
 					product_category_id: faker.string.uuid(),
 					product_category_name: faker.commerce.department(),
-					product_category_attributes: { color: faker.color.human() },
+
 				},
 			}),
 		)

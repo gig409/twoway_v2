@@ -6,7 +6,8 @@ import {
 	getSelectProps,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
-import { type Prisma } from '@prisma/client'
+// eslint-disable-next-line import/consistent-type-specifier-style
+import type { Prisma } from 'generated/prisma/client' // Adjust import based on your Prisma setup
 import { useMemo } from 'react'
 import { Form, useFormAction, useNavigation } from 'react-router'
 import { z } from 'zod/v4' // Or, zod/v4 or zod/v4-mini
@@ -1063,7 +1064,11 @@ export default function QuotationForm({
 			<div className="flex gap-4">
 				<Button type="submit" disabled={isPending}>
 					{isPending && <Spinner />}
-					{isPending ? 'Saving...' : _isEditing ? 'Edit Quotation' : 'Create Quotation'}
+					{isPending
+						? 'Saving...'
+						: _isEditing
+							? 'Edit Quotation'
+							: 'Create Quotation'}
 				</Button>
 
 				<Button type="button" outline>
