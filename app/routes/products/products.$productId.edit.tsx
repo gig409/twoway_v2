@@ -28,13 +28,12 @@ export async function loader({ params }: Route.LoaderArgs) {
 			select: {
 				product_category_id: true,
 				product_category_name: true,
-				product_category_attributes: true,
 			},
 		})
 
 		return { product, product_categories }
 	} catch (error) {
-		throw new Response('Failed to load product', { status: 500 })
+		throw new Response(`Failed to load product ${error}`, { status: 500 })
 	}
 }
 

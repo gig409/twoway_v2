@@ -20,7 +20,6 @@ export async function loader({}: Route.LoaderArgs) {
 			select: {
 				product_category_id: true,
 				product_category_name: true,
-				product_category_attributes: true,
 			},
 		})
 

@@ -5,8 +5,6 @@ import {
 	type SubmissionResult,
 } from '@conform-to/react'
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
-// eslint-disable-next-line import/consistent-type-specifier-style
-import type { JsonValue } from '@prisma/client/runtime/library'
 import { Form, useFormAction, useNavigation } from 'react-router'
 import { z } from 'zod/v4' // Or, zod/v4 or zod/v4-mini
 import { GeneralErrorBoundary } from '~/components/error-boundary'

@@ -1,6 +1,4 @@
-import { type Prisma } from '@prisma/client'
 import {
-	createColumnHelper,
 	flexRender,
 	getCoreRowModel,
 	getFilteredRowModel,
@@ -9,19 +7,15 @@ import {
 	useReactTable,
 	type ColumnDef,
 	type ColumnFiltersState,
-	type FilterFn,
-	type SortingFn,
 	type SortingState,
 } from '@tanstack/react-table'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
-
 import { Heading } from '../../components/ui/heading'
 // eslint-disable-next-line import/consistent-type-specifier-style
 import type { Route } from '../quotations/+types/quotations._index'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { Link } from '~/components/ui/link'
 import { Select } from '~/components/ui/select'
 import {
 	Table,
@@ -34,51 +28,6 @@ import {
 import { Text } from '~/components/ui/text'
 import { Toast } from '~/components/ui/toast'
 import prisma from '~/lib/prisma'
-
-type QuotationSelect = Prisma.Quotation_RequestGetPayload<{
-	select: {
-		quotation_request_id: true
-		quotation_request_ref: true
-		quotation_request_date: true
-		quotation_request_vessel: true
-		createdAt: true
-		company: {
-			select: {
-				company_id: true
-				company_name: true
-			}
-		}
-		employee: {
-			select: {
-				employee_id: true
-				employee_name: true
-			}
-		}
-		quotation_request_line_items: {
-			select: {
-				product: {
-					select: {
-						product_id: true
-						product_name: true
-					}
-				}
-				supplier_quotations: {
-					select: {
-						supplier_quotation_id: true
-						supplier: {
-							select: {
-								supplier_id: true
-								supplier_name: true
-							}
-						}
-					}
-				}
-				quotation_request_line_item_id: true
-				quotation_request_line_item_quantity: true
-			}
-		}
-	}
-}>
 
 export function meta() {
 	return [
@@ -145,8 +94,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 		console.error(error)
 		return { quotations: [], successMessage }
 	}
-
-	return { quotations: [], successMessage }
 }
 
 export default function QuotationsIndex({ loaderData }: Route.ComponentProps) {

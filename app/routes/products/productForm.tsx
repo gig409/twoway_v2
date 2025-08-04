@@ -8,7 +8,6 @@ import {
 import { getZodConstraint, parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zod/v4-mini, import `@conform-to/zod/v4`.
 // eslint-disable-next-line import/consistent-type-specifier-style
 import type { JsonValue } from '@prisma/client/runtime/library'
-import { useEffect, useState } from 'react'
 import { Form, useFormAction, useNavigation } from 'react-router'
 import { z } from 'zod/v4' // Or, zod/v4 or zod/v4-mini
 import { Select } from '../../components/ui/select'
@@ -41,7 +40,6 @@ interface ProductFormProps {
 		product_categories: {
 			product_category_id: string
 			product_category_name: string
-			product_category_attributes: JsonValue
 		}[]
 	}
 	product?: Product
@@ -84,59 +82,6 @@ export default function ProductForm({
 		key,
 		value,
 	}))
-
-	const [selectedCategoryId, setSelectedCategoryId] = useState(
-		product?.product_category_id || '',
-	)
-
-	const [categoryAttributes, setCategoryAttributes] = useState<
-		{ key: string; value: string }[]
-	>([])
-
-	useEffect(() => {
-		if (selectedCategoryId && loaderData.product_categories) {
-			const selectedCategory = loaderData.product_categories.find(
-				(cat) => cat.product_category_id === selectedCategoryId,
-			)
-
-			if (selectedCategory?.product_category_attributes) {
-				const attributes = selectedCategory.product_category_attributes
-				if (
-					attributes &&
-					typeof attributes === 'object' &&
-					attributes !== null
-				) {
-					const attributeEntries = Object.entries(
-						attributes as Record<string, any>,
-					)
-					setCategoryAttributes(
-						attributeEntries.map(([key, value]) => ({
-							key,
-							value: String(value),
-						})),
-					)
-				} else {
-					setCategoryAttributes([])
-				}
-			} else {
-				setCategoryAttributes([])
-			}
-		} else {
-			setCategoryAttributes([])
-		}
-		// const selectedCategory = loaderData.product_categories?.find(
-		// 	(category) => category.product_category_id === selectedCategoryId,
-		// )
-
-		// setCategoryAttributes(
-		// 	Object.entries(
-		// 		selectedCategory?.product_category_attributes as Record<string, string>,
-		// 	).map(([key, value]) => ({
-		// 		key,
-		// 		value,
-		// 	})),
-		// )
-	}, [loaderData.product_categories, selectedCategoryId])
 
 	const [form, fields] = useForm({
 		id: 'my-form',
@@ -227,9 +172,6 @@ export default function ProductForm({
 								<Select
 									{...getSelectProps(fields.product_category_id)}
 									invalid={!!fields.product_category_id.errors}
-									onChange={(e) => {
-										setSelectedCategoryId(e.target.value)
-									}}
 								>
 									<option value="">Select a category</option>
 									{loaderData.product_categories?.map((category) => (
@@ -247,29 +189,6 @@ export default function ProductForm({
 									<Label htmlFor={fields.product_attributes.id}>
 										Product Attributes
 									</Label>
-									<Description>
-										{categoryAttributes.length > 0
-											? 'Product Category Attributes'
-											: ''}
-									</Description>
-									{categoryAttributes.length > 0 ? (
-										<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-											{categoryAttributes.map((attr, index) => (
-												<Fieldset key={index}>
-													<Field>
-														<Label>Attribute Key</Label>
-														<Input value={attr.key} readOnly disabled />
-													</Field>
-													<Field>
-														<Label>Attribute Value</Label>
-														<Input value={attr.value} readOnly disabled />
-													</Field>
-												</Fieldset>
-											))}
-										</div>
-									) : (
-										<></>
-									)}
 									<Description>Optional additional attributes.</Description>
 									{attrubutesList.map((field, index) => {
 										const attributeFields = field.getFieldset()
