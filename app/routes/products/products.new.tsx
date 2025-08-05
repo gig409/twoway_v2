@@ -2,7 +2,7 @@ import { parseWithZod } from '@conform-to/zod/v4' // Or, if you use zod/v4 or zo
 import { redirect } from 'react-router'
 // eslint-disable-next-line import/consistent-type-specifier-style
 import type { Route } from '../products/+types/products.new'
-import ProductForm, { FormSchema } from './productForm'
+import ProductForm, { getProductFormSchema } from './productForm'
 import { Heading } from '~/components/ui/heading'
 import { Text } from '~/components/ui/text'
 import prisma from '~/lib/prisma'
@@ -33,12 +33,19 @@ export async function loader({}: Route.LoaderArgs) {
 export async function action({ request }: Route.ActionArgs) {
 	const formData = await request.formData()
 
+	const existingProducts = await prisma.product.findMany({
+		select: {
+			product_id: true,
+			product_name: true,
+			product_attributes: true,
+		},
+	})
+
 	const submission = parseWithZod(formData, {
-		schema: FormSchema,
+		schema: getProductFormSchema(existingProducts),
 	})
 
 	if (submission.status !== 'success') {
-		console.log('errors:', submission)
 		return submission.reply()
 	}
 

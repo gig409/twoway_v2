@@ -45,7 +45,10 @@ interface ProductFormProps {
 	product?: Product
 }
 
+const MAX_ATTRIBUTES_PER_PRODUCT = 20
+
 export const FormSchema = z.object({
+	product_id: z.string().optional(),
 	product_name: z
 		.string({ error: 'Product name is required' })
 		.min(2, 'Must be min 2 chars')
@@ -64,6 +67,72 @@ export const FormSchema = z.object({
 		.optional(),
 	product_category_id: z.string({ error: 'Product category ID is required' }),
 })
+
+export const getProductFormSchema = (
+	existingProducts?: {
+		product_id: string
+		product_name: string
+		product_attributes?: any
+	}[],
+	currentProductName?: string,
+) => {
+	let validationSchema = FormSchema
+
+	if (existingProducts) {
+		const productNames = new Set(
+			existingProducts.map((product) =>
+				product.product_name.toLocaleLowerCase().trim(),
+			),
+		)
+
+		validationSchema = validationSchema.refine(
+			(data) => {
+				const repeatProduct = existingProducts.find(
+					() =>
+						productNames.has(data.product_name.toLocaleLowerCase().trim()) &&
+						// Ensure we don't match the current product if editing
+						data.product_name !== currentProductName,
+				)
+				if (!repeatProduct) return true
+			},
+			{
+				message:
+					'Product names must be unique. This product name is already used in another product.',
+				path: ['product_name'],
+			},
+		)
+	}
+
+	for (let i = 0; i < MAX_ATTRIBUTES_PER_PRODUCT; i++) {
+		validationSchema = validationSchema.refine(
+			(data) => {
+				if (!data.product_attributes || data.product_attributes.length <= 1) {
+					return true
+				}
+
+				if (!data.product_attributes[i]) {
+					return true
+				}
+
+				const currentAttributeKey = data.product_attributes[i].key
+					.toLowerCase()
+					.trim()
+
+				const duplicateKeys = data.product_attributes.some((attr, index) => {
+					if (index === i || !attr || !attr.key) return false
+					return attr.key.toLowerCase().trim() === currentAttributeKey
+				})
+				return !duplicateKeys
+			},
+			{
+				message: 'Attribute keys must be unique.',
+				path: ['product_attributes', i, 'key'],
+			},
+		)
+	}
+
+	return validationSchema
+}
 
 export default function ProductForm({
 	isEditing,
@@ -108,9 +177,6 @@ export default function ProductForm({
 	})
 
 	const attrubutesList = fields.product_attributes.getFieldList()
-
-	console.log('Form submission errors:', actionData)
-	console.log('Fields:', fields)
 
 	return (
 		<div className="overflow-hidden rounded-lg bg-white shadow-sm">
@@ -194,8 +260,8 @@ export default function ProductForm({
 										const attributeFields = field.getFieldset()
 										return (
 											<Fieldset key={field.key}>
-												<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-													<Field>
+												<div className="mb-2 flex items-start gap-2">
+													<Field className="flex-1">
 														<Label htmlFor={attributeFields.key.id}>
 															Attribute Key
 														</Label>
@@ -212,7 +278,7 @@ export default function ProductForm({
 															</ErrorMessage>
 														)}
 													</Field>
-													<Field>
+													<Field className="flex-1">
 														<Label htmlFor={attributeFields.value.id}>
 															Attribute Value
 														</Label>
@@ -229,19 +295,21 @@ export default function ProductForm({
 															</ErrorMessage>
 														)}
 													</Field>
+													<div className="pt-9">
+														<Button
+															type="button"
+															onClick={() =>
+																form.remove({
+																	name: fields.product_attributes.name,
+																	index,
+																})
+															}
+															disabled={attrubutesList.length === 0}
+														>
+															Remove Attribute
+														</Button>
+													</div>
 												</div>
-												<Button
-													type="button"
-													onClick={() =>
-														form.remove({
-															name: fields.product_attributes.name,
-															index,
-														})
-													}
-													disabled={attrubutesList.length === 0}
-												>
-													Remove Attribute
-												</Button>
 											</Fieldset>
 										)
 									})}
