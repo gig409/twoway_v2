@@ -1,6 +1,9 @@
 FROM oven/bun:1 AS base
 WORKDIR /usr/src/app
 
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl
+
 # Install dependencies into temp directory
 FROM base AS install
 RUN mkdir -p /temp/dev
