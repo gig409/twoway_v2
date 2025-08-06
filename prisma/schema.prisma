@@ -2,9 +2,11 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-  moduleFormat = "esm"
+  provider      = "prisma-client"
+  output        = "../generated/prisma"
+  moduleFormat  = "esm"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  engineType    = "library"
 }
 
 datasource db {
@@ -75,8 +77,8 @@ model Product {
 }
 
 model ProductCategory {
-  product_category_id         String @id
-  product_category_name       String
+  product_category_id   String @id
+  product_category_name String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -104,8 +106,8 @@ model Quotation_Request {
 }
 
 model Quotation_Request_Line_Item {
-  quotation_request_line_item_id       String @id
-  quotation_request_line_item_quantity Int
+  quotation_request_line_item_id          String @id
+  quotation_request_line_item_quantity    Int
   quotation_request_line_items_attributes Json?
 
   quotation_request_id String
